@@ -1,0 +1,3 @@
+# Shared environment for the extractor and the vendored Gamebody code.
+# Verified with Python 3.12 on Apple Silicon; see Gamebody/SETUP-URECA.md.
+-r Gamebody/requirements-ureca.txt
