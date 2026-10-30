@@ -1,4 +1,60 @@
-# Body, face, and hand landmark extraction
+# Body gesture analysis
+
+`detect_gestures.py` is the main entry point for video-based gesture analysis.
+It runs the existing body/face/hand extraction pipeline, then exports observable
+arm gestures with timestamps, durations, and occurrence counts. It can also
+analyze saved landmark arrays without running the models again.
+
+## Gesture analysis
+
+```sh
+conda activate ureca
+python detect_gestures.py --input "/path/to/classroom.mp4" --seconds 120
+
+# Reuse an earlier extraction and its matching *_metadata.json:
+python detect_gestures.py --landmarks "/path/to/session_arrays.npz"
+```
+
+The initial geometric rules detect:
+
+| Labels | Definition |
+| --- | --- |
+| `left_hand_raised`, `right_hand_raised` | Wrist above its shoulder by at least 15% of shoulder width; bent elbows are accepted |
+| `left_arm_extended`, `right_arm_extended` | Elbow angle at least 155 degrees, with image-relative arm direction |
+| `arms_crossed` | Both arms bent, wrists crossing the torso center toward the opposite upper arms, at chest height |
+| `left_hand_pointing`, `right_hand_pointing` | Index finger extended and at least two other fingers curled; thumb is ignored |
+
+Pointing uses detailed hand landmarks. An extended arm alone is not labelled as
+a pointing finger. Hand-side labels follow sufficiently confident model
+predictions; ambiguous or missing predictions remain unknown. Directions are
+relative to the unmirrored image, independently of anatomical left/right.
+
+By default, results go to `outputs/gestures/`:
+
+- `*_gestures_frames.csv`: frame-level labels and directions. `1` means positive,
+  `0` means observed negative, and blank means insufficient data.
+- `*_gestures_events.csv`: continuous gesture episodes, with start/end frames,
+  start/end timestamps, duration, and dominant direction.
+- `*_gestures_summary.json`: event counts, total event durations, observable
+  durations, settings and output paths.
+- `landmarks/`: raw extraction outputs when using `--input`.
+
+Events require 0.3 seconds of consecutive positive frames by default. Change
+this with `--min-duration`. Missing observations end events and are not counted
+as negative observations. Multiple gestures can overlap. Changes in direction
+do not split a continuous gesture episode; its dominant direction is reported.
+The event filter does not modify raw frame labels.
+
+Use `--visibility` (default 0.5) and `--handedness-confidence` (default 0.7) to
+set observation thresholds. `--no-face` and `--no-hands` disable the respective
+model during video extraction. Face landmarks and blendshapes remain available
+as raw outputs; this script does not yet classify facial movements, walking,
+body orientation, zones, or group/desk interactions. These gesture rules are
+an initial implementation and require validation on the intended recordings.
+
+Saved-array analysis requires the matching metadata JSON for image dimensions,
+because geometric measurements account for image aspect ratio. Timestamps must
+be regularly sampled. A one-frame archive needs FPS metadata or `--fps`.
 
 ## Setup after cloning
 
@@ -14,15 +70,15 @@ Download the three models using [models/README.md](models/README.md), then run
 the extractor with your own video:
 
 ```sh
-python extract_speaker_pose.py --input "/path/to/video.mp4" --seconds 120
+python detect_gestures.py --input "/path/to/video.mp4" --seconds 120
 ```
 
 This repository includes code, tests, configuration, and documentation. Input
 videos, generated outputs, downloaded model binaries, and local caches are
-excluded from Git. The `Gamebody/` source is included directly; see
-[THIRD_PARTY.md](THIRD_PARTY.md) for attribution and its license.
+excluded from Git. See [THIRD_PARTY.md](THIRD_PARTY.md) for dependency and model
+attribution.
 
-## Extraction
+## Raw landmark extraction
 
 The extractor now runs MediaPipe Pose, Face, and Hand Landmarkers on the same
 frames and timestamps. Face and hands are enabled by default, with one body,

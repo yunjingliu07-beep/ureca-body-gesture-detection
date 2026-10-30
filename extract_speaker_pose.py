@@ -62,7 +62,7 @@ def missing_intervals(detected, fps):
     return intervals
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=Path("linear algebra.mp4"))
     parser.add_argument("--model", type=Path, default=Path("models/pose_landmarker_full.task"))
@@ -73,7 +73,7 @@ def main():
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"))
     parser.add_argument("--seconds", type=float, default=120)
     parser.add_argument("--visibility", type=float, default=0.5)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if not math.isfinite(args.seconds) or args.seconds <= 0 or not 0 <= args.visibility <= 1:
         parser.error("seconds must be positive and visibility must be between 0 and 1")
     models = {"Pose": args.model}
@@ -244,6 +244,7 @@ def main():
     summary["landmarkers"] = {name: {key: value for key, value in item.items() if key in ("enabled", "frames_detected", "detection_fraction")}
                              for name, item in metadata["landmarkers"].items()}
     print(json.dumps(summary, indent=2))
+    return metadata
 
 
 if __name__ == "__main__":

@@ -8,11 +8,6 @@ outputs/
 *.npz
 *.task
 *.tflite
-Gamebody/demo.gif
-Gamebody/body_landmarks.png
-
-# Preserve the local upstream checkout without embedding its Git metadata.
-Gamebody/.git/
 
 # Machine-specific settings, caches, and credentials.
 .DS_Store
