@@ -1,12 +1,10 @@
-import csv
-import json
-from pathlib import Path
-from tempfile import TemporaryDirectory
+"""Geometry tests for arm and finger rules used by the current body extractor."""
+
 import unittest
 
 import numpy as np
 
-from detect_gestures import GESTURES, analyze, classify_frame, direction, event_rows
+from body_gestures import classify_frame, direction
 
 
 def body():
@@ -79,33 +77,6 @@ class GestureTests(unittest.TestCase):
                                   handedness=["Right", ""], handedness_scores=[0.95, np.nan])
         self.assertIs(states["right_hand_pointing"], False)
         self.assertIsNone(states["left_hand_pointing"])
-
-    def test_unknown_breaks_events_and_duration_filters_short_episodes(self):
-        states = [dict.fromkeys(GESTURES) for _ in range(6)]
-        for index, value in enumerate([True, True, True, None, True, True]):
-            states[index]["left_hand_raised"] = value
-        events = event_rows(np.arange(6) / 10, states, [{} for _ in states], 0.1, 0.25)
-        self.assertEqual(len(events), 1)
-        self.assertAlmostEqual(events[0]["duration_s"], 0.3)
-        self.assertAlmostEqual(events[0]["end_s_exclusive"], 0.3)
-        self.assertEqual(events[0]["end_frame_exclusive"], 3)
-
-    def test_saved_archive_exports_unknowns_and_event_measurements(self):
-        with TemporaryDirectory() as directory:
-            root = Path(directory)
-            path = root / "session_arrays.npz"
-            np.savez_compressed(path, normalized_landmarks=np.stack([body()] * 12),
-                                pose_detected=np.ones(12, dtype=bool), timestamps_s=np.arange(12) / 30)
-            (root / "session_metadata.json").write_text(json.dumps({"width": 1920, "height": 1080, "fps": 30}))
-            summary = analyze(path, root / "results")
-            self.assertEqual(summary["gestures"]["left_arm_extended"]["event_count"], 1)
-            self.assertAlmostEqual(summary["gestures"]["left_arm_extended"]["event_duration_s"], 0.4)
-            self.assertEqual(summary["gestures"]["left_hand_pointing"]["observable_duration_s"], 0)
-            with Path(summary["outputs"]["frames"]).open(newline="") as file:
-                rows = list(csv.DictReader(file))
-            self.assertEqual(len(rows), 12)
-            self.assertEqual(rows[0]["left_arm_extended"], "1")
-            self.assertEqual(rows[0]["left_hand_pointing"], "")
 
 
 if __name__ == "__main__":

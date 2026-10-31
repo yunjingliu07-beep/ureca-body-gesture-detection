@@ -1,0 +1,37 @@
+{
+  "confirmation_s": 0.25,
+  "body": {
+    "visibility": 0.5,
+    "handedness_confidence": 0.7,
+    "history_s": 1.5,
+    "motion_min_s": 1.0,
+    "max_gap_s": 0.25,
+    "stationary_radius": 0.12,
+    "walking_speed": 0.25,
+    "leg_deadband": 0.10,
+    "leg_reversals": 2,
+    "facing_tolerance_deg": 35,
+    "turn_min_deg": 40,
+    "turn_max_deg": 150,
+    "zone_dwell_s": 0.4,
+    "crossing_display_s": 0.8,
+    "approach_speed": 0.25,
+    "approach_radius": 3.0,
+    "arrival_radius": 1.0,
+    "desk_radius": 0.8,
+    "standing_knee_deg": 160,
+    "standing_tilt_deg": 25
+  },
+  "face": {
+    "smile_threshold": 0.45,
+    "brow_raise_threshold": 0.35,
+    "brow_lower_threshold": 0.35
+  },
+  "scene": {
+    "board_yaw_deg": null,
+    "class_yaw_deg": null,
+    "zones": [],
+    "groups": [],
+    "desks": []
+  }
+}
