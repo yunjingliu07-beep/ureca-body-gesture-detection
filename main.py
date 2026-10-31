@@ -27,7 +27,7 @@ import cv2
 import numpy as np
 
 from behaviour_common import TemporalGate
-from body_gestures import BODY_LABELS, BodyGestureExtractor, BodyRules, validate_scene
+from body_gestures import BODY_LABELS, DEFAULT_SCENE, BodyGestureExtractor, BodyRules, validate_scene
 from facial_expressions import FACE_LABELS, FaceRules, FacialExpressionExtractor
 
 
@@ -43,7 +43,7 @@ def load_settings(path=None):
         raise ValueError("Config accepts only body, face, scene, and confirmation_s")
     body = BodyRules(**settings.get("body", {}))
     face = FaceRules(**settings.get("face", {}))
-    scene = settings.get("scene", {})
+    scene = {**DEFAULT_SCENE, **settings.get("scene", {})}
     validate_scene(scene)
     confirmation = settings.get("confirmation_s", 0.25)
     TemporalGate(confirmation)
@@ -242,8 +242,9 @@ def main(argv=None):
             last_ms = timestamp_ms
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
-            raw, info, mask, _, _ = body.process(image, timestamp_ms, t)
             face_states, face_info, scores = (dict.fromkeys(FACE_LABELS), {}, {}) if face is None else face.process(image, timestamp_ms, width, height)
+            raw, info, mask, _, _ = body.process(image, timestamp_ms, t,
+                                                face_landmarks=None if face is None else face.landmarks)
             raw.update(face_states)
             info.update(face_info)
             face_detected = bool(scores)
@@ -296,7 +297,8 @@ def main(argv=None):
                   "CSV: 1=true, 0=false, blank=unknown. Raw columns precede temporal confirmation.",
                   "Events describe confirmed video labels; their starts exclude the initial confirmation delay.",
                   "Rules are reviewable heuristics, not validated activity or emotion recognition.",
-                  "Body orientation is a torso-facing proxy, not measured gaze.",
+                  "Back-of-classroom camera: default class yaw is 0 (toward camera), board yaw is 180 (away).",
+                  "Facing labels use torso yaw; turning labels use face-skeleton center relative to shoulder-midpoint neck, in image left/right coordinates.",
                   "Face and hand models run independently; person association is not implemented."],
         "outputs": {name: str(path.resolve()) for name, path in paths.items()},
     }

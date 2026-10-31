@@ -63,15 +63,21 @@ missing-data handling are documented in [BEHAVIOUR_RULES.md](BEHAVIOUR_RULES.md)
 [BEHAVIOUR_RULES.md](BEHAVIOUR_RULES.md) documents each rule, threshold, unit,
 assumption and output field. Use
 [classroom_config.example.json](classroom_config.example.json) to adjust the
-thresholds and annotate your scene. Board/class yaw angles, zones, group
-locations and desk footprints are intentionally unset until configured.
+thresholds and annotate your scene. The back-of-classroom camera defaults to
+class-facing toward the camera (yaw 0), and board-facing away (yaw 180).
+Zones, group locations and desk footprints need your annotations.
+
+`turning_left` and `turning_right` compare the facial-skeleton center to the
+shoulder-midpoint neck coordinate, using image left/right and a 10%-of-shoulder-
+width deadband. `turning` is their combined label. These head-posture labels use
+the current face mesh, with visible Pose face points as a fallback.
 
 These are initial heuristics for validation. The pipeline assumes a fixed
 camera and one visible speaker; it does not select the active speaker or
 associate different people across the independent models. Missing landmarks
 produce unknown labels. In the Calculus test, the legs are cropped out, so
 walking and standing rules remain unknown. Facial labels describe visible
-movements, not emotions. Without classroom annotations, scene-specific labels
+movements, not emotions. Without classroom annotations, location-specific labels
 also remain unknown.
 
 ## Setup

@@ -164,8 +164,7 @@ class BodyRules:
     leg_deadband: float = 0.10
     leg_reversals: int = 2
     facing_tolerance_deg: float = 35.0
-    turn_min_deg: float = 40.0
-    turn_max_deg: float = 150.0
+    turn_face_offset: float = 0.10
     zone_dwell_s: float = 0.4
     crossing_display_s: float = 0.8
     approach_speed: float = 0.25
@@ -180,8 +179,8 @@ class BodyRules:
             raise ValueError("Body thresholds must be positive finite numbers")
         if not 0 < self.visibility <= 1 or not 0 < self.handedness_confidence <= 1:
             raise ValueError("Confidence thresholds must be in (0, 1]")
-        if self.history_s < self.motion_min_s or self.turn_max_deg > 180 or self.turn_max_deg <= self.turn_min_deg:
-            raise ValueError("Invalid temporal window or turning angle range")
+        if self.history_s < self.motion_min_s:
+            raise ValueError("history_s must be at least motion_min_s")
         if self.hand_motion_window_s < self.hand_motion_min_s:
             raise ValueError("hand_motion_window_s must be at least hand_motion_min_s")
         if self.arrival_radius > self.approach_radius:
@@ -193,8 +192,12 @@ class BodyRules:
 BODY_LABELS = (*GESTURES, "left_pointing_direction", "right_pointing_direction",
                "left_hand_movement", "right_hand_movement",
                "stationary", "walking", "standing", "moving_between_zones",
-               "facing_board", "facing_class", "turning", "approaching_group",
+               "facing_board", "facing_class", "turning", "turning_left", "turning_right", "approaching_group",
                "group_arrival", "standing_beside_desk")
+
+
+# Back-of-classroom camera: toward camera = class; away = front board.
+DEFAULT_SCENE = {"board_yaw_deg": 180.0, "class_yaw_deg": 0.0}
 
 
 def validate_scene(scene):
@@ -239,6 +242,49 @@ def angular_difference(first, second):
     return (first - second + 180) % 360 - 180
 
 
+def classify_head_turn(pose, width, height, rules=None, face_landmarks=None):
+    """Face-skeleton center relative to shoulder-midpoint neck; image left/right."""
+    rules = rules or BodyRules()
+    states = dict.fromkeys(("turning", "turning_left", "turning_right"))
+    info = {"face_skeleton_source": None}
+    valid = (np.isfinite(pose).all(axis=1) & (pose[:, 3] >= rules.visibility)
+             & (pose[:, 4] >= rules.visibility)
+             & ((pose[:, :2] >= 0) & (pose[:, :2] <= 1)).all(axis=1))
+    if not valid[[11, 12]].all():
+        return states, info
+    scale = np.array([width, height], dtype=float)
+    shoulders = pose[[11, 12], :2] * scale
+    neck = shoulders.mean(axis=0)
+    shoulder_width = float(np.linalg.norm(shoulders[0] - shoulders[1]))
+    if shoulder_width < 1:
+        return states, info
+    face_points = None
+    if face_landmarks is not None:
+        mesh = np.asarray(face_landmarks, dtype=float)
+        if mesh.ndim == 2 and mesh.shape[1] >= 2:
+            observed = (np.isfinite(mesh[:, :2]).all(axis=1)
+                        & ((mesh[:, :2] >= 0) & (mesh[:, :2] <= 1)).all(axis=1))
+            if np.count_nonzero(observed) >= 3:
+                face_points = mesh[observed, :2] * scale
+                info["face_skeleton_source"] = "face_mesh"
+    if face_points is None:
+        # Pose's first 11 points form its face skeleton; confidence-filter each.
+        indices = np.flatnonzero(valid[:11])
+        if len(indices) < 3:
+            return states, info
+        face_points = pose[indices, :2] * scale
+        info["face_skeleton_source"] = "pose_face"
+    face_center = np.median(face_points, axis=0)
+    offset = float((face_center[0] - neck[0]) / shoulder_width)
+    states["turning_left"] = bool(offset < -rules.turn_face_offset - 1e-9)
+    states["turning_right"] = bool(offset > rules.turn_face_offset + 1e-9)
+    states["turning"] = states["turning_left"] or states["turning_right"]
+    info.update(neck_xy_px=neck.tolist(), face_center_xy_px=face_center.tolist(),
+                face_neck_offset_shoulder_widths=offset,
+                turning_direction_coordinates="image_left_right")
+    return states, info
+
+
 def torso_yaw(world, valid):
     """0 faces camera; +90 faces image right; +/-180 faces away from camera."""
     if world is None or not valid[[11, 12, 23, 24]].all():
@@ -263,7 +309,7 @@ def any_observed(values):
 class BodyGestureDetector:
     def __init__(self, width, height, rules=None, scene=None):
         self.rules = rules or BodyRules()
-        self.scene = scene or {}
+        self.scene = {**DEFAULT_SCENE, **(scene or {})}
         validate_scene(self.scene)
         self.width, self.height = width, height
         self.scale = np.array([width, height], dtype=float)
@@ -308,7 +354,7 @@ class BodyGestureDetector:
             info[f"{side}_hand_movement_range_shoulder_widths"] = extent
             states[f"{side}_hand_movement"] = bool(extent >= r.hand_motion_range)
 
-    def update(self, pose, world, timestamp_s, **hand_args):
+    def update(self, pose, world, timestamp_s, *, face_landmarks=None, **hand_args):
         r = self.rules
         if not math.isfinite(timestamp_s) or (self.last_t is not None and timestamp_s <= self.last_t):
             raise ValueError("Timestamps must be finite and strictly increasing")
@@ -321,6 +367,9 @@ class BodyGestureDetector:
                                             handedness_confidence=r.handedness_confidence, **hand_args)
         states.update(dict.fromkeys(label for label in BODY_LABELS if label not in states))
         info = {"directions": directions, "zone": None, "zone_crossing": ""}
+        head_states, head_info = classify_head_turn(pose, self.width, self.height, r, face_landmarks)
+        states.update(head_states)
+        info.update(head_info)
         for side in ("left", "right"):
             # A coarse arm-direction proxy is explicitly separate from finger pointing.
             extended = states[f"{side}_arm_extended"]
@@ -347,7 +396,7 @@ class BodyGestureDetector:
         leg_vector = (points[27] - points[28]) / torso if feet is not None else None
         yaw = torso_yaw(world, valid)
         row = {"t": timestamp_s, "hips": hips, "torso": torso, "feet": feet,
-               "legs": leg_vector, "yaw": yaw}
+               "legs": leg_vector}
         self.history.append(row)
         while self.history and timestamp_s - self.history[0]["t"] > r.history_s + 1e-9:
             self.history.popleft()
@@ -370,12 +419,6 @@ class BodyGestureDetector:
                 states["walking"] = bool(speed >= r.walking_speed and reversals >= r.leg_reversals
                                          and not states["stationary"])
                 info["leg_reversals"] = reversals
-            yaws = [h["yaw"] for h in self.history]
-            if all(y is not None for y in yaws):
-                change = math.degrees(float(np.unwrap(np.radians(yaws))[-1] - np.unwrap(np.radians(yaws))[0]))
-                states["turning"] = bool(r.turn_min_deg <= abs(change) <= r.turn_max_deg)
-                info["yaw_change_deg"] = change
-
         if yaw is not None:
             for label, key in (("facing_board", "board_yaw_deg"), ("facing_class", "class_yaw_deg")):
                 target = self.scene.get(key)
@@ -473,7 +516,7 @@ class BodyGestureExtractor:
     def __exit__(self, *exc):
         return self.stack.__exit__(*exc)
 
-    def process(self, image, timestamp_ms, timestamp_s):
+    def process(self, image, timestamp_ms, timestamp_s, face_landmarks=None):
         result = self.pose.detect_for_video(image, timestamp_ms)
         pose = np.full((33, 5), np.nan)
         world = np.full_like(pose, np.nan)
@@ -500,7 +543,7 @@ class BodyGestureExtractor:
                     "hand_detected": self.hands.arrays["hand_detected"][0],
                     "handedness": self.hands.arrays["hand_handedness"][0],
                     "handedness_scores": self.hands.arrays["hand_handedness_scores"][0]}
-        states, info = self.detector.update(pose, world, timestamp_s, **args)
+        states, info = self.detector.update(pose, world, timestamp_s, face_landmarks=face_landmarks, **args)
         info["pose_detected"] = bool(result.pose_landmarks)
         return states, info, mask, pose, world
 

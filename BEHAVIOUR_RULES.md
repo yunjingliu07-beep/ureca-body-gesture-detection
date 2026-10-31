@@ -36,7 +36,8 @@ ankles, and location rules are unknown when either ankle is unobservable.
 
 The history window is 1.5 s, with at least 1.0 s of continuous torso evidence.
 A missing torso or a frame gap > 0.25 s resets history. Walking needs valid
-ankles throughout its window; turning needs valid torso yaw throughout it.
+ankles throughout its window. Directional turning needs the current facial
+skeleton and both shoulders; it does not require a torso-history window.
 No points, scores or labels are filled forward through missing detections.
 
 Every positive raw label needs 0.25 s of continuous evidence before display.
@@ -56,9 +57,11 @@ All thresholds below are defaults unless overridden by the config.
 | Stationary / `stationary` | Maximum hip-midpoint distance from the window's mean position <= 0.12 T, over at least 1.0 s | `stationary_radius`, `history_s`, `motion_min_s` |
 | Walking / `walking` | Net hip displacement / window duration >= 0.25 T/s, stationary is false, and relative ankle motion reverses sign at least twice. Choose the x/y axis with the greatest range of `(left_ankle - right_ankle)/T`; discard samples with magnitude < 0.10 before counting sign reversals. Displacement alone is insufficient. | `walking_speed`, `leg_deadband`, `leg_reversals` |
 | Moving between zones / `moving_between_zones` | Ankle midpoint enters an annotated zone and stays there >= 0.4 s after a different previously established zone. Show the crossing for 0.8 s, then apply the common confirmation filter. Initial occupancy is not a crossing. Traversing an unannotated area keeps the last established zone; missing ankles/torso resets it. Overlapping polygon membership is ambiguous. | scene `zones`, `zone_dwell_s`, `crossing_display_s` |
-| Facing the board / `facing_board` | Torso yaw lies within 35 degrees of your calibrated `board_yaw_deg` | scene `board_yaw_deg`, `facing_tolerance_deg` |
-| Facing the class / `facing_class` | Same yaw comparison, against `class_yaw_deg` | scene `class_yaw_deg`, `facing_tolerance_deg` |
-| Turning / `turning` | Absolute unwrapped yaw change over the window is between 40 and 150 degrees, then persists through confirmation. This is a rolling orientation-change episode; it can remain positive briefly after rotation stops. | `turn_min_deg`, `turn_max_deg` |
+| Facing the board / `facing_board` | With a back-of-classroom camera, torso yaw is within 35 degrees of 180 degrees (away from camera, toward the front board) by default | scene `board_yaw_deg` (default 180), `facing_tolerance_deg` |
+| Facing the class / `facing_class` | Torso yaw is within 35 degrees of 0 degrees (toward the camera and the class) by default | scene `class_yaw_deg` (default 0), `facing_tolerance_deg` |
+| Turning left / `turning_left` | `(face_center.x - neck.x) / shoulder_width < -0.10`, using the unmirrored video's image coordinates | `turn_face_offset` |
+| Turning right / `turning_right` | Same offset > +0.10 | `turn_face_offset` |
+| Turning / `turning` | Either directional turning rule is true. This now describes a head turned to a side, rather than the previous change-in-torso-yaw rule. | `turn_face_offset`, common confirmation filter |
 | Raising a hand / `left_hand_raised`, `right_hand_raised` | Wrist is above its same-side shoulder by >= 0.15 shoulder widths. Elbow straightness/visibility is not required, so a bent-elbow raise is accepted. | Existing rule in `body_gestures.py` |
 | Extending arms / `left_arm_extended`, `right_arm_extended` | Shoulder-elbow-wrist image angle >= 155 degrees. Direction is one of eight image directions using 45-degree bins. | Existing rule in `body_gestures.py` |
 | Coarse pointing / `left_pointing_direction`, `right_pointing_direction` | Arm is extended and its direction is horizontal or upward (exclude the three downward bins). This is a pointing-direction proxy; an open hand can qualify. | Dedicated proxy rule in `body_gestures.py` |
@@ -117,12 +120,49 @@ right, -90 image left, and +/-180 away from the camera. Reject degenerate normal
 when their horizontal magnitude divided by `|across| * |down|` is < 0.2.
 Angle comparisons wrap correctly at +/-180 degrees.
 
-This deliberately uses **torso facing**, rather than assuming nose direction is
-gaze. A head turned independently of the torso will not change these labels.
-Calibrate board/class angles using `torso_yaw_deg` in the frame CSV's
-`measurements_json` during known examples. A board's 2D image location alone
-cannot establish its 3D direction relative to the speaker. Pose depth and
-front/back orientation are noisy, especially with occlusion or rear views.
+The camera is assumed to be at the back of the classroom: **facing the camera
+means facing the class**. Defaults are `class_yaw_deg = 0` and
+`board_yaw_deg = 180`; these apply even without a config file. Override them for
+an off-axis camera/board, or set either to `null` to disable that facing label.
+Facing labels describe torso orientation rather than measured gaze. A sideways
+head turn can therefore coexist with a torso-facing-class label. Calibrate
+angles using `torso_yaw_deg` in CSV `measurements_json` if needed. Estimated
+pose depth and front/back orientation are noisy, particularly in rear views.
+
+### Directional turning from the face skeleton and neck
+
+MediaPipe Pose has no separate neck landmark, so `neck` is the midpoint of the
+two shoulder coordinates. Both shoulders must pass the normal body confidence
+checks. The face center is the coordinate-wise median of finite, in-frame
+Face Landmarker mesh points from the **same frame**, with at least three points.
+When the detailed face model is disabled, misses the face, or has fewer than
+three usable points, use the median of at least three confidence-filtered Pose
+face landmarks (indices 0-10). If neither source is usable, all three turning
+labels are unknown. Never reuse a previous frame's face.
+
+```text
+neck = (left_shoulder + right_shoulder) / 2
+face_center = median(current visible facial-skeleton points)
+offset = (face_center.x - neck.x) / distance(left_shoulder, right_shoulder)
+turning_left  = offset < -0.10
+turning_right = offset > +0.10
+turning = turning_left OR turning_right
+```
+
+Coordinates are aspect-corrected pixels. The +/-10%-of-shoulder-width deadband
+avoids calling tiny sideways offsets a turn. Equality is treated as centered.
+Left/right mean **image left/right**, as specified by the face's side of the
+neck, rather than the teacher's anatomical left/right. The two side labels are
+mutually exclusive and need the common 0.25 s of continuous positive evidence
+before display. A held side-facing head remains labelled; these are posture
+episodes, not a claim that rotation is still occurring. Leaning can also move
+the face relative to the neck and produce a label under this geometric rule.
+
+The CSV records `neck_xy_px`, `face_center_xy_px`,
+`face_neck_offset_shoulder_widths`, `face_skeleton_source` (`face_mesh` or
+`pose_face`), and the coordinate convention for review. The former
+`turn_min_deg` / `turn_max_deg` torso-change settings have been replaced by
+`turn_face_offset`.
 
 ## Facial expression rules
 
@@ -144,9 +184,9 @@ The same 0.25 s confirmation applies. Raw coefficients are saved per frame.
 
 ## Configure your classroom
 
-`classroom_config.example.json` contains every new threshold. Scene fields are
-intentionally empty/null so a first run does not invent your classroom layout.
-Without annotations, those specific labels remain unknown; other rules run.
+`classroom_config.example.json` contains every threshold. Facing defaults are
+set for the back-of-classroom camera. Zones, groups and desks remain empty
+until annotated; those location-dependent labels stay unknown.
 
 Copy it to `classroom_config.json`. Coordinates are normalized to the **original,
 unmirrored source image**: x from left to right and y from top to bottom. Draw

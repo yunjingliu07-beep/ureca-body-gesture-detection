@@ -14,8 +14,7 @@
     "leg_deadband": 0.10,
     "leg_reversals": 2,
     "facing_tolerance_deg": 35,
-    "turn_min_deg": 40,
-    "turn_max_deg": 150,
+    "turn_face_offset": 0.10,
     "zone_dwell_s": 0.4,
     "crossing_display_s": 0.8,
     "approach_speed": 0.25,
@@ -31,8 +30,8 @@
     "brow_lower_threshold": 0.35
   },
   "scene": {
-    "board_yaw_deg": null,
-    "class_yaw_deg": null,
+    "board_yaw_deg": 180,
+    "class_yaw_deg": 0,
     "zones": [],
     "groups": [],
     "desks": []

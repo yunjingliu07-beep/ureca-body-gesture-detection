@@ -82,7 +82,8 @@ class BehaviourTests(unittest.TestCase):
         self.assertTrue(states["stationary"])
         self.assertTrue(states["standing"])
         self.assertFalse(states["walking"])
-        self.assertIsNone(states["facing_board"])
+        self.assertFalse(states["facing_board"])
+        self.assertTrue(states["facing_class"])
         self.assertIsNone(states["moving_between_zones"])
         self.assertIsNone(states["approaching_group"])
 
@@ -109,14 +110,13 @@ class BehaviourTests(unittest.TestCase):
         states, _ = detector.update(*body(), 3.0)
         self.assertIsNone(states["stationary"])
 
-    def test_turn_and_orientation_wrap_at_180(self):
+    def test_orientation_wrap_at_180(self):
         detector = BodyGestureDetector(1000, 1000, scene={"board_yaw_deg": 180, "class_yaw_deg": 0})
         for index in range(16):
             states, info = detector.update(*body(yaw=150 + index * 4), index / 10)
-        self.assertTrue(states["turning"])
+        self.assertIsNone(states["turning"])
         self.assertTrue(states["facing_board"])
         self.assertFalse(states["facing_class"])
-        self.assertAlmostEqual(info["yaw_change_deg"], 60)
         pose, world = body(yaw=90)
         self.assertAlmostEqual(torso_yaw(world, np.isfinite(pose).all(axis=1)), 90)
 

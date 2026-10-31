@@ -53,6 +53,7 @@ class FacialExpressionExtractor:
     def __init__(self, model_path, rules=None):
         self.model_path = model_path
         self.rules = rules or FaceRules()
+        self.landmarks = None
 
     def __enter__(self):
         from face_hand_landmarks import FaceHandLandmarkers
@@ -65,11 +66,14 @@ class FacialExpressionExtractor:
 
     def process(self, image, timestamp_ms, width, height):
         from face_hand_landmarks import BLENDSHAPE_NAMES
+        self.landmarks = None
         # The helper normally stores a complete clip; slot 0 is reused here.
         self.model.arrays["face_detected"][0] = False
         self.model.arrays["face_blendshapes"][0] = float("nan")
         self.model.process(image, timestamp_ms, 0, width, height)
         detected = bool(self.model.arrays["face_detected"][0])
+        if detected:
+            self.landmarks = self.model.arrays["face_landmarks"][0].copy()
         scores = dict(zip(BLENDSHAPE_NAMES, map(float, self.model.arrays["face_blendshapes"][0]))) if detected else {}
         states, measurements = classify_expressions(scores, detected, self.rules)
         return states, measurements, scores
