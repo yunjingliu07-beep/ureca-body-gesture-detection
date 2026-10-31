@@ -156,6 +156,9 @@ class BodyRules:
     history_s: float = 1.5
     motion_min_s: float = 1.0
     max_gap_s: float = 0.25
+    hand_motion_window_s: float = 0.5
+    hand_motion_min_s: float = 0.3
+    hand_motion_range: float = 0.12
     stationary_radius: float = 0.12
     walking_speed: float = 0.25
     leg_deadband: float = 0.10
@@ -179,6 +182,8 @@ class BodyRules:
             raise ValueError("Confidence thresholds must be in (0, 1]")
         if self.history_s < self.motion_min_s or self.turn_max_deg > 180 or self.turn_max_deg <= self.turn_min_deg:
             raise ValueError("Invalid temporal window or turning angle range")
+        if self.hand_motion_window_s < self.hand_motion_min_s:
+            raise ValueError("hand_motion_window_s must be at least hand_motion_min_s")
         if self.arrival_radius > self.approach_radius:
             raise ValueError("arrival_radius cannot exceed approach_radius")
         if not isinstance(self.leg_reversals, int):
@@ -186,6 +191,7 @@ class BodyRules:
 
 
 BODY_LABELS = (*GESTURES, "left_pointing_direction", "right_pointing_direction",
+               "left_hand_movement", "right_hand_movement",
                "stationary", "walking", "standing", "moving_between_zones",
                "facing_board", "facing_class", "turning", "approaching_group",
                "group_arrival", "standing_beside_desk")
@@ -262,6 +268,7 @@ class BodyGestureDetector:
         self.width, self.height = width, height
         self.scale = np.array([width, height], dtype=float)
         self.history = deque()
+        self.hand_history = {side: deque() for side in ("left", "right")}
         self.last_t = None
         self.zone_candidate = None
         self.zone_since = None
@@ -274,6 +281,32 @@ class BodyGestureDetector:
         self.zone_candidate = self.zone_since = self.stable_zone = None
         self.crossing_until = -1.0
         self.crossing = ""
+
+    def _hand_movement(self, points, valid, timestamp_s, states, info):
+        """Track each wrist relative to its shoulder, independently of torso/legs."""
+        r = self.rules
+        width = float(np.linalg.norm(points[11] - points[12])) if valid[[11, 12]].all() else 0.0
+        for side, shoulder, wrist in (("left", 11, 15), ("right", 12, 16)):
+            history = self.hand_history[side]
+            if width < 1 or not valid[wrist]:
+                history.clear()
+                continue
+            if history and timestamp_s - history[-1][0] > r.max_gap_s:
+                history.clear()
+            # Remove common image translation and normalize apparent body size.
+            position = (points[wrist] - points[shoulder]) / width
+            history.append((timestamp_s, position))
+            while history and timestamp_s - history[0][0] > r.hand_motion_window_s + 1e-9:
+                history.popleft()
+            span = timestamp_s - history[0][0]
+            info[f"{side}_hand_movement_span_s"] = span
+            if span + 1e-9 < r.hand_motion_min_s:
+                continue
+            positions = np.array([item[1] for item in history])
+            # Pairwise extent also catches a hand moving out and back to its start.
+            extent = float(np.linalg.norm(positions[:, None] - positions[None, :], axis=2).max())
+            info[f"{side}_hand_movement_range_shoulder_widths"] = extent
+            states[f"{side}_hand_movement"] = bool(extent >= r.hand_motion_range)
 
     def update(self, pose, world, timestamp_s, **hand_args):
         r = self.rules
@@ -300,10 +333,11 @@ class BodyGestureDetector:
         valid = (np.isfinite(pose).all(axis=1) & (pose[:, 3] >= r.visibility)
                  & (pose[:, 4] >= r.visibility)
                  & ((pose[:, :2] >= 0) & (pose[:, :2] <= 1)).all(axis=1))
+        points = pose[:, :2] * self.scale
+        self._hand_movement(points, valid, timestamp_s, states, info)
         if not valid[[11, 12, 23, 24]].all():
             self._reset()
             return states, info
-        points = pose[:, :2] * self.scale
         shoulders, hips = points[[11, 12]].mean(axis=0), points[[23, 24]].mean(axis=0)
         torso = float(np.linalg.norm(hips - shoulders))
         if torso < 1:

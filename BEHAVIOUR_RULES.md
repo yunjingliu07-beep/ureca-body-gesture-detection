@@ -28,8 +28,10 @@ body size. Temporal comparisons use the median `T` in the window. These values
 are **not measured meters or ground-plane distances**.
 
 Body points must be finite, inside the image, and have both visibility and
-presence >= 0.5. Arm rules need their listed points; temporal body rules require
-both shoulders and hips. The floor-position anchor is the midpoint of both
+presence >= 0.5. Arm rules need their listed points; torso-based temporal rules
+require both shoulders and hips. General hand movement only needs both shoulders
+and the corresponding wrist, so it still works with cropped hips or legs.
+The floor-position anchor is the midpoint of both
 ankles, and location rules are unknown when either ankle is unobservable.
 
 The history window is 1.5 s, with at least 1.0 s of continuous torso evidence.
@@ -49,6 +51,8 @@ All thresholds below are defaults unless overridden by the config.
 
 | Requested behaviour / output label | Exact rule | Tunable settings |
 | --- | --- | --- |
+| Left hand movement / `left_hand_movement` | Over the last 0.5 s, the largest distance between any two observations of `(left_wrist - left_shoulder) / shoulder_width` is >= 0.12 shoulder widths. Require at least 0.3 s of consecutive valid observations. | `hand_motion_window_s`, `hand_motion_min_s`, `hand_motion_range` |
+| Right hand movement / `right_hand_movement` | Same independent rule for `(right_wrist - right_shoulder) / shoulder_width`. Bent elbows and arbitrary movement directions are accepted. | Same hand-motion settings |
 | Stationary / `stationary` | Maximum hip-midpoint distance from the window's mean position <= 0.12 T, over at least 1.0 s | `stationary_radius`, `history_s`, `motion_min_s` |
 | Walking / `walking` | Net hip displacement / window duration >= 0.25 T/s, stationary is false, and relative ankle motion reverses sign at least twice. Choose the x/y axis with the greatest range of `(left_ankle - right_ankle)/T`; discard samples with magnitude < 0.10 before counting sign reversals. Displacement alone is insufficient. | `walking_speed`, `leg_deadband`, `leg_reversals` |
 | Moving between zones / `moving_between_zones` | Ankle midpoint enters an annotated zone and stays there >= 0.4 s after a different previously established zone. Show the crossing for 0.8 s, then apply the common confirmation filter. Initial occupancy is not a crossing. Traversing an unannotated area keeps the last established zone; missing ankles/torso resets it. Overlapping polygon membership is ambiguous. | scene `zones`, `zone_dwell_s`, `crossing_display_s` |
@@ -69,6 +73,32 @@ wrists crossing toward the opposite upper arms, wrist height from 0.2 shoulder
 widths above to 1.2 below the shoulder midpoint, and each wrist within 0.65
 shoulder widths of the opposite shoulder-elbow segment. See `classify_frame`
 in `body_gestures.py` for the exact projections.
+
+### General left/right hand movement
+
+These two broad labels describe visible wrist movement relative to its own
+shoulder, independently of raising, extending or pointing. Both sides can be
+positive together and can overlap other gesture labels. Pose wrist landmarks
+are sufficient; detailed finger tracking is not required, including when
+`--no-hands` is used. Left/right refer to the speaker's anatomical sides.
+
+Each frame uses the current image shoulder width for normalization. Subtracting
+the shoulder removes shared body translation; dividing by shoulder width also
+removes ideal uniform image scaling. Maximum pairwise distance across the
+window detects out-and-back motion even when net displacement is zero. Small
+tracking jitter below the 0.12-width threshold is ignored. This measures 2D
+wrist motion, not finger-only movements or reliable motion along camera depth.
+Torso rotation, perspective changes and pose-estimation errors can still cause
+apparent movement.
+
+An invisible/low-confidence wrist resets only its own side's history; missing
+shoulders reset both. A gap > 0.25 s resets the affected history. During the
+initial 0.3 s, or with missing required points, the label is unknown. After
+enough valid observations, movement below threshold is false. The common
+0.25 s continuous-positive confirmation still applies before video display.
+Because this is a rolling window, a movement label can remain positive for up
+to 0.5 s after the wrist stops. CSV measurements include each side's history
+span and movement range in shoulder-width units.
 
 ### Torso orientation definition
 

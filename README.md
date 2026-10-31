@@ -53,6 +53,11 @@ Every script starts with a note explaining its purpose. The body module contains
 all active body geometry and drawing functions; only `main.py` is a video entry
 point.
 
+General `left_hand_movement` and `right_hand_movement` labels track each wrist
+relative to its shoulder over time. They accept bent elbows and any visible
+movement direction, and work without detailed finger tracking. Thresholds and
+missing-data handling are documented in [BEHAVIOUR_RULES.md](BEHAVIOUR_RULES.md).
+
 ## Review the rules
 
 [BEHAVIOUR_RULES.md](BEHAVIOUR_RULES.md) documents each rule, threshold, unit,
