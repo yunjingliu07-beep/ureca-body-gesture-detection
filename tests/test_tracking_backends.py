@@ -5,6 +5,7 @@ from dataclasses import replace
 import io
 import json
 import math
+import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
@@ -173,6 +174,11 @@ class TrackingTests(unittest.TestCase):
             def __exit__(self,*a):pass
             def process(self,*a):return dict.fromkeys(BODY_LABELS),{'pose_detected':False},None,np.full((33,5),np.nan),None
             def draw(self,*a):pass
+        class FakeDetector:
+            def __init__(self):self.metadata={'backend':'test detector'}
+            def __enter__(self):return self
+            def __exit__(self,*a):pass
+            def detect(self,*a):raise AssertionError('No observable hands in this fixture')
         with tempfile.TemporaryDirectory() as name:
             root=Path(name);source=root/'source.mp4'
             writer=cv2.VideoWriter(str(source),cv2.VideoWriter_fourcc(*'mp4v'),29.97,(64,64))
@@ -181,14 +187,29 @@ class TrackingTests(unittest.TestCase):
             path,hmad=exports(root,[observation(i/25) for i in range(10)])
             (hmad/'manifest.json').write_text(json.dumps({'openface_csv_sha256':sha256(path),'source_sha256':sha256(source),
                 'roi_px':[0,0,64,64],'analysis_fps':25.,'hmad_revision':'test-fixture'}))
-            with patch('main.BodyGestureExtractor',FakeBody):
-                metadata=main(['--input',str(source),'--full-video','--openface-csv',str(path),
-                               '--hmad-results',str(hmad),'--no-objects','--output-dir',str(root/'out')])
-            self.assertEqual(metadata['processed_frames'],12)
-            with Path(metadata['outputs']['frames']).open() as f:frames=list(csv.DictReader(f))
-            self.assertEqual(len(frames),12);self.assertEqual(frames[0]['smiling'],'1')
-            with Path(metadata['outputs']['events']).open() as f:events=list(csv.DictReader(f))
-            self.assertTrue(any(e['behaviour']=='smiling' and e['timing_type']=='hmad_interval' for e in events))
+            model=root/'fixture.task';model.write_bytes(b'Controlled extractor fixture')
+            find_spec=importlib.util.find_spec
+            for index,flags in enumerate(([],['--teaching-aids','off'],['--teaching-aids','on'])):
+                enabled=flags==['--teaching-aids','on']
+                with self.subTest(flags=flags), patch('main.BodyGestureExtractor',FakeBody), \
+                     patch('main.GroundingDinoDetector',return_value=FakeDetector()) as detector, \
+                     patch('importlib.util.find_spec',side_effect=lambda name: (object() if enabled else None) if name in ('torch','transformers') else find_spec(name)):
+                    metadata=main(['--input',str(source),'--full-video','--openface-csv',str(path),
+                                   '--hmad-results',str(hmad),'--pose-model',str(model),'--hand-model',str(model),
+                                   '--output-dir',str(root/f'out_{index}'),*flags])
+                    if enabled:detector.assert_called_once()
+                    else:detector.assert_not_called()
+                    self.assertEqual(metadata['processed_frames'],12)
+                    self.assertIs(metadata['teaching_aid_detection']['enabled'],enabled)
+                    self.assertIs(metadata['objects'] is not None,enabled)
+                    with Path(metadata['outputs']['frames']).open() as f:frames=list(csv.DictReader(f))
+                    self.assertEqual(len(frames),12);self.assertEqual(frames[0]['smiling'],'1')
+                    self.assertIs(json.loads(frames[0]['measurements_json'])['teaching_aids_enabled'],enabled)
+                    if not enabled:
+                        self.assertTrue(all(row['holding_teaching_aid']=='' for row in frames))
+                        self.assertEqual(json.loads(frames[0]['measurements_json'])['object_reason'],'disabled_by_option')
+                    with Path(metadata['outputs']['events']).open() as f:events=list(csv.DictReader(f))
+                    self.assertTrue(any(e['behaviour']=='smiling' and e['timing_type']=='hmad_interval' for e in events))
 
 
 class HoldingTests(unittest.TestCase):

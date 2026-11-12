@@ -424,6 +424,14 @@ heuristic camera checks, not guaranteed camera-motion segmentation.
 
 ## Teaching-aid detection and holding
 
+Select `--teaching-aids on` or `--teaching-aids off` before analysis. The default
+is **off**. Off mode skips object dependency checks, model loading and inference;
+holding labels stay unknown, and the review video reports teaching aids as
+disabled. Body, hand, head, face and gaze tracking remain enabled according to
+their own settings. The selected mode is printed at startup and recorded in
+metadata as `teaching_aid_detection`. `--no-objects` is a compatibility alias for
+off. Combining on with `--no-hands` is rejected before processing.
+
 Grounding DINO Tiny detects these configured object categories in crops around
 the teacher's hands: pen, pencil, marker, chalk, pointer, remote, book, paper
 and tablet. OpenFace/HMAD do not detect objects. The default model revision is

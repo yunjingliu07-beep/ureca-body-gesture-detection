@@ -2,6 +2,7 @@
 
 import csv
 import io
+from contextlib import redirect_stderr
 import math
 from pathlib import Path
 import unittest
@@ -13,7 +14,7 @@ from behaviour_common import TemporalGate
 from body_gestures import (BodyGestureDetector, BodyRules, draw_skeleton,
                            polygon_distance, torso_yaw, validate_scene, visible_points)
 from facial_expressions import classify_expressions
-from main import DEFAULT_INPUT, PROJECT_DIR, EventWriter, build_parser, load_settings, render_mask
+from main import DEFAULT_INPUT, PROJECT_DIR, EventWriter, build_parser, load_settings, main, render_mask
 
 
 def body(x=0.5, leg=0.04, yaw=0):
@@ -52,6 +53,21 @@ class BehaviourTests(unittest.TestCase):
         args = parser.parse_args(["--input", "other.mp4", "--seconds", "10"])
         self.assertEqual(args.input, Path("other.mp4"))
         self.assertEqual(args.seconds, 10)
+
+    def test_teaching_aid_switch_defaults_off_and_keeps_disable_alias(self):
+        parser = build_parser()
+        self.assertEqual(parser.parse_args([]).teaching_aids, "off")
+        self.assertEqual(parser.parse_args(["--teaching-aids", "on"]).teaching_aids, "on")
+        self.assertEqual(parser.parse_args(["--teaching-aids", "off"]).teaching_aids, "off")
+        self.assertEqual(parser.parse_args(["--no-objects"]).teaching_aids, "off")
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            parser.parse_args(["--teaching-aids", "on", "--no-objects"])
+
+    def test_enabling_teaching_aids_requires_hands_before_analysis(self):
+        errors = io.StringIO()
+        with redirect_stderr(errors), self.assertRaises(SystemExit):
+            main(["--teaching-aids", "on", "--no-hands"])
+        self.assertIn("requires hand tracking", errors.getvalue())
 
     def test_body_drawing_helpers_without_legacy_extractor(self):
         landmarks = [SimpleNamespace(x=0.4, y=0.4, visibility=0.99, presence=0.99),

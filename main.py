@@ -6,6 +6,7 @@ Confirmed behaviours appear in the upper-right corner. Frame CSV, event CSV,
 and metadata JSON preserve the rules and measurements for manual review.
 
 Default: python main.py (first 30 seconds of the Calculus 1 Lecture 0.1 video).
+Teaching-aid detection is off by default; select --teaching-aids on to enable it.
 Scene-dependent rules: add --config classroom_config.example.json after editing
 its example coordinates and orientation angles for your own fixed camera.
 """
@@ -94,7 +95,9 @@ def draw_panel(frame, states, info, timestamp_s):
     if info.get("smile_level"):
         lines.append("Smile level: " + info["smile_level"])
     held = info.get("held_objects", [])
-    if held:
+    if info.get("teaching_aids_enabled") is False:
+        lines.append("Teaching aids: disabled")
+    elif held:
         lines.append("Teaching aids: " + ", ".join(sorted({o["class"] + " (" + o["hand"] + ")" for o in held})))
     elif "holding_status" in info:
         lines.append("Teaching aids: " + info["holding_status"].replace("_", " "))
@@ -197,7 +200,11 @@ def build_parser():
     parser.add_argument("--hmad-results", type=Path, help="Import canonical HMAD results with matching manifest.json")
     parser.add_argument("--no-face", action="store_true", help="Explicitly disable head/expression/gaze/depth analysis")
     parser.add_argument("--no-hands", action="store_true", help="Hand/object holding and finger pointing become unknown")
-    parser.add_argument("--no-objects", action="store_true", help="Explicitly disable teaching-aid detection")
+    objects = parser.add_mutually_exclusive_group()
+    objects.add_argument("--teaching-aids", choices=("on", "off"), default="off",
+                         help="Enable or disable teaching-aid detection before analysis; default: off (faster)")
+    objects.add_argument("--no-objects", dest="teaching_aids", action="store_const", const="off",
+                         help="Compatibility alias for --teaching-aids off")
     parser.add_argument("--objects-model", default="IDEA-Research/grounding-dino-tiny")
     parser.add_argument("--objects-revision", default="a2bb814dd30d776dcf7e30523b00659f4f141c71", help="HF revision or commit, recorded in metadata")
     parser.add_argument("--objects-device", choices=("cpu", "mps", "cuda"), default="cpu")
@@ -217,6 +224,8 @@ def dependency_report(args):
     return {"FeatureExtraction": shutil.which(str(args.openface_bin)), "Rscript": shutil.which(args.rscript),
             "ffmpeg": shutil.which(args.ffmpeg), "HMAD": (args.hmad_dir / "sourceR").is_dir(),
             "pose_model": args.pose_model.is_file(), "hand_model": args.hand_model.is_file(),
+            "teaching_aids": args.teaching_aids,
+            "object_dependencies_required": args.teaching_aids == "on",
             **{name: importlib.util.find_spec(name) is not None for name in ("mediapipe", "torch", "transformers")}}
 
 
@@ -252,6 +261,10 @@ def main(argv=None):
         parser.error("Invalid mask settings")
     if not all(math.isfinite(v) for v in args.teacher_roi) or not (0 <= args.teacher_roi[0] < args.teacher_roi[2] <= 1 and 0 <= args.teacher_roi[1] < args.teacher_roi[3] <= 1):
         parser.error("--teacher-roi must satisfy 0 <= X0 < X1 <= 1 and 0 <= Y0 < Y1 <= 1")
+    objects_enabled = args.teaching_aids == "on"
+    if objects_enabled and args.no_hands:
+        parser.error("--teaching-aids on requires hand tracking; remove --no-hands or use --teaching-aids off")
+    print(f"Teaching-aid detection: {args.teaching_aids.upper()}", flush=True)
     try:
         body_rules, tracking, scene, confirmation = load_settings(args.config)
         if not args.no_face:
@@ -264,7 +277,7 @@ def main(argv=None):
                 resolve_executable(args.rscript, "Rscript")
                 if not (args.hmad_dir / "sourceR").is_dir():
                     raise ValueError("HMAD is missing; run setup_tracking.py --download-hmad")
-        if not args.no_objects and not args.no_hands:
+        if objects_enabled:
             import importlib.util
             if any(importlib.util.find_spec(name) is None for name in ("torch", "transformers")):
                 raise ValueError("Object detection dependencies missing; install requirements-objects.txt")
@@ -314,7 +327,7 @@ def main(argv=None):
                                                        None if args.no_hands else args.hand_model))
         face = None if face_assets is None else stack.enter_context(FacialExpressionExtractor(face_assets["timeline"], face_assets["cycles"]))
         objects, object_detector = None, None
-        if not args.no_objects and not args.no_hands:
+        if objects_enabled:
             object_detector = stack.enter_context(GroundingDinoDetector(args.objects_model, args.objects_revision,
                 args.objects_device, tracking.objects, str(PROJECT_DIR / "models/hf-cache")))
             objects = TeachingAidTracker(object_detector, tracking.objects, body_rules.visibility)
@@ -363,7 +376,8 @@ def main(argv=None):
             info.update(camera_info)
             info.update(camera_measurements)
             object_raw, object_states, object_info = (dict.fromkeys(OBJECT_LABELS), dict.fromkeys(OBJECT_LABELS),
-                {"holding_status": "unknown", "held_objects": [], "object_reason": "disabled_or_hands_disabled"}) if objects is None else objects.process(crop, t, pose, body.hand_observations)
+                {"holding_status": "unknown", "held_objects": [], "object_reason": "disabled_by_option"}) if objects is None else objects.process(crop, t, pose, body.hand_observations)
+            object_info["teaching_aids_enabled"] = objects_enabled
             raw.update(object_raw)
             info.update(object_info)
             states = gate.update({k: v for k, v in raw.items() if k not in DIRECT_LABELS and k not in OBJECT_LABELS}, t)
@@ -414,6 +428,7 @@ def main(argv=None):
         "frames_with_pose": pose_count, "frames_with_face": face_count, "mediapipe_version": mp.__version__,
         "body": asdict(body_rules), "tracking": asdict(tracking), "scene": scene, "confirmation_s": confirmation,
         "native": native_manifest, "objects": None if object_detector is None else object_detector.metadata,
+        "teaching_aid_detection": {"requested": args.teaching_aids, "enabled": objects_enabled},
         "coverage": {**coverage, "face_analysis": None if face_assets is None else face_assets["coverage"]},
         "ignored_zero_duration_intervals": None if face_assets is None else face_assets["ignored_zero_duration_intervals"],
         "cut_times_s": cut_times, "processing_seconds": time.monotonic()-started,

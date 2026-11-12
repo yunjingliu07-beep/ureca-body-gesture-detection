@@ -30,6 +30,22 @@ The default input is **Calculus 1 Lecture 0.1: Lines, Angle of Inclination, and
 the Distance Formula**, the WebM in the project root. The default duration is
 30 seconds. Use a new empty output directory for each run.
 
+**Teaching-aid detection defaults to OFF.** Choose the mode before starting:
+
+```sh
+# Body, hands, head, face and gaze; object detector stays unloaded.
+python main.py --teaching-aids off --output-dir outputs/body_face_run
+
+# Enable the additional teaching-aid detector (slower).
+python main.py --teaching-aids on --objects-device mps --output-dir outputs/with_teaching_aids
+```
+
+Omitting `--teaching-aids` also selects `off`. The selected mode is printed
+before analysis, recorded in metadata, and shown as disabled in the review
+video when off. Off mode does not check object-model dependencies, load its
+weights, or run object inference. The existing `--no-objects` flag remains an
+alias for `--teaching-aids off`. Body, hand and facial extraction still run.
+
 ```sh
 python main.py --input "/path/to/classroom.mp4" --seconds 30 --output-dir outputs/classroom_30s
 python main.py --full-video --output-dir outputs/full_lecture
@@ -49,10 +65,12 @@ also makes object holding unknown. No branch silently falls back to the old
 facial mechanism. Missing required tools fail preflight; individual HMAD model
 failures are reported in metadata and their dependent labels remain unknown.
 
-Grounding DINO runs on hand crops for every source frame with usable teacher
+When `--teaching-aids on` is selected, Grounding DINO runs on hand crops for every source frame with usable teacher
 hands. CPU inference can be slow. `--objects-device mps` or `cuda` selects a
 supported accelerator explicitly. An occluded/tiny pen can remain undetected;
 `no_target_object_observed` does not prove the teacher has empty hands.
+Enabling teaching aids together with `--no-hands` is rejected before analysis,
+because holding detection requires hand tracking.
 
 ## Setup
 
@@ -72,6 +90,10 @@ python build_native.py
 python setup_tracking.py --download-hmad --download-object-model
 python main.py --check-dependencies
 ```
+
+For body/facial runs only, `requirements.txt` is sufficient for the Python
+dependencies; `requirements-objects.txt` and the Grounding DINO download are
+needed when enabling teaching aids. OpenFace/R/HMAD are still required for faces.
 
 `build_native.py` requires conda and Xcode Command Line Tools. It installs native
 libraries locally, builds dlib/OpenFace, downloads the four CE-CLM landmark
@@ -200,7 +222,7 @@ Verified on 12 November 2026:
 
 | Check | Result |
 | --- | --- |
-| Automated tests | 43 passed |
+| Automated tests | 45 passed, including default-off and explicit on/off detector selection |
 | Native OpenFace extraction | 751 analysis frames at 25 fps covering the 30-second lecture selection |
 | Current HMAD bridge | Head model, AUs, smiles, brows, blink model, gaze model and ELAN export all succeeded; see `outputs/native_current_verified/` |
 | Native/body video run | 900 source frames decoded and matched 900 CSV rows, 30.03 s; see `outputs/openface_hmad_30s_final/verification.json` |
