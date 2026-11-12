@@ -194,22 +194,33 @@ class TrackingTests(unittest.TestCase):
                 with self.subTest(flags=flags), patch('main.BodyGestureExtractor',FakeBody), \
                      patch('main.GroundingDinoDetector',return_value=FakeDetector()) as detector, \
                      patch('importlib.util.find_spec',side_effect=lambda name: (object() if enabled else None) if name in ('torch','transformers') else find_spec(name)):
-                    metadata=main(['--input',str(source),'--full-video','--openface-csv',str(path),
+                    duration_flags=['--seconds','.3'] if index==2 else ['--full-video']
+                    window_flags=['--window-seconds','.1'] if index else []
+                    metadata=main(['--input',str(source),*duration_flags,*window_flags,'--openface-csv',str(path),
                                    '--hmad-results',str(hmad),'--pose-model',str(model),'--hand-model',str(model),
                                    '--output-dir',str(root/f'out_{index}'),*flags])
                     if enabled:detector.assert_called_once()
                     else:detector.assert_not_called()
-                    self.assertEqual(metadata['processed_frames'],12)
+                    expected_frames=9 if index==2 else 12
+                    self.assertEqual(metadata['processed_frames'],expected_frames)
                     self.assertIs(metadata['teaching_aid_detection']['enabled'],enabled)
                     self.assertIs(metadata['objects'] is not None,enabled)
                     with Path(metadata['outputs']['frames']).open() as f:frames=list(csv.DictReader(f))
-                    self.assertEqual(len(frames),12);self.assertEqual(frames[0]['smiling'],'1')
+                    self.assertEqual(len(frames),expected_frames);self.assertEqual(frames[0]['smiling'],'1')
                     self.assertIs(json.loads(frames[0]['measurements_json'])['teaching_aids_enabled'],enabled)
                     if not enabled:
                         self.assertTrue(all(row['holding_teaching_aid']=='' for row in frames))
                         self.assertEqual(json.loads(frames[0]['measurements_json'])['object_reason'],'disabled_by_option')
                     with Path(metadata['outputs']['events']).open() as f:events=list(csv.DictReader(f))
                     self.assertTrue(any(e['behaviour']=='smiling' and e['timing_type']=='hmad_interval' for e in events))
+                    with Path(metadata['outputs']['windows']).open() as f:windows=list(csv.DictReader(f))
+                    self.assertEqual(metadata['window_summary']['window_count'],[1,5,3][index])
+                    smile=[row for row in windows if row['behaviour']=='smiling']
+                    self.assertAlmostEqual(sum(float(row['active_seconds']) for row in smile),
+                                           .3 if index==2 else .4, places=5)
+                    if not enabled:
+                        self.assertTrue(all(row['active_seconds']=='' for row in windows
+                                            if row['behaviour']=='holding_teaching_aid'))
 
 
 class HoldingTests(unittest.TestCase):

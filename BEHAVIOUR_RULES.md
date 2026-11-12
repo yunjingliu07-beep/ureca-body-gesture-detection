@@ -547,6 +547,8 @@ The output directory defaults to `outputs/behaviours` and contains:
 - `*_frames.csv`: raw/confirmed behaviour states, direction, zone, measurements,
   OpenFace/HMAD measurements, smile level, holding status and held-object types.
 - `*_events.csv`: confirmed episodes with timestamps and durations.
+- `*_windows.csv`: per-behaviour duration, coverage and counts in consecutive
+  source-time windows (30 seconds by default).
 - `*_metadata.json`: full effective settings, model hashes and detection counts.
 - `*_preview.jpg`: a representative frame, preferring a visible skeleton and
   confirmed labels over opening titles.
@@ -559,6 +561,44 @@ HMAD is upstream R sequence analysis and loads its selected clip into memory;
 use manageable source clips for long recordings. Use a new output directory for each run; existing
 results are protected against replacement. Interrupted/failed runs can leave
 partial MP4/CSV files; only a successful run writes the final metadata JSON.
+
+### Consecutive gesture duration windows
+
+`--window-seconds` defaults to 30 and must be positive and finite. Windows start
+at source time zero, are nonoverlapping and half-open: `[0,30)`, `[30,60)`, etc.
+The last window ends at the selected analysis duration. `--seconds` caps the
+summary exactly, excluding an encoded fractional-frame tail; `--full-video`
+uses the full decoded duration. Recognition histories and confirmation gates
+continue across boundaries. Aggregation happens after recognition finishes;
+OpenFace/HMAD remains offline sequence processing.
+
+The window CSV has one row per window/behaviour. `active_seconds` is the union
+of confirmed event intervals inside that window, intersected with observable
+frame intervals `[frame_index/fps, (frame_index+1)/fps)`. Observability requires
+a nonblank confirmed frame state. This retains native subframe facial timings
+while excluding unknown periods. Completed nod/shake cycles contribute their
+start-to-completion motion duration, not just the completion-frame display.
+Cycles completing outside the selected half-open prefix contribute neither
+duration nor count, even when imported native inference covers a longer clip.
+Adjacent smile categories and duplicate/overlapping positives are merged.
+
+`event_count` counts each observed posture/facial episode once, in the window
+containing its start. Unknown gaps split observed episodes. Completed cycles
+count individually in the window containing completion (`count_basis` is
+`cycle_completion`; other labels use `episode_start`). `events_overlapping`
+counts events with active observable time in each window, so a boundary-crossing
+event can overlap both windows while contributing only one `event_count`.
+
+`inactive_seconds = observed_seconds - active_seconds` and
+`unknown_seconds = window_duration_s - observed_seconds`.
+`active_percent_observed = 100 * active_seconds / observed_seconds`.
+Activity and counts are blank for wholly unobserved behaviour/windows, including
+disabled teaching-aid detection. Exported seconds use six decimal places. Labels
+can co-occur; their durations are not mutually exclusive categories.
+
+`window_summary.py --metadata PATH` can regenerate this CSV from existing frame
+and event evidence without loading recognition models. It replaces only its
+window CSV, and rejects incomplete/nonconsecutive frames or invalid event times.
 
 API references: [Pose Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/python)
 for skeleton/world landmarks and segmentation;

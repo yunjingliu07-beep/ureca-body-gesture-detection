@@ -29,6 +29,8 @@ python main.py --output-dir outputs/my_first_tracking_run
 The default input is **Calculus 1 Lecture 0.1: Lines, Angle of Inclination, and
 the Distance Formula**, the WebM in the project root. The default duration is
 30 seconds. Use a new empty output directory for each run.
+Every run also exports gesture durations in consecutive **30-second windows**
+to `*_windows.csv`, alongside the frame-by-frame recognition and review video.
 
 **Teaching-aid detection defaults to OFF.** Choose the mode before starting:
 
@@ -190,17 +192,80 @@ Each successful run writes:
 | `*_behaviours.mp4` | Silent source-resolution/FPS video, body/mask/hand overlays, native facial landmarks/gaze arrows, confirmed objects and labels |
 | `*_frames.csv` | Raw/confirmed states, smile category, holding status/types, per-modality evidence and native AU/pose/gaze measurements |
 | `*_events.csv` | `confirmed_posture`, native `hmad_interval` and `completed_cycle` records, with source and exclusive end times |
+| `*_windows.csv` | One row per behaviour per consecutive 30-second window: active/observed/unknown seconds, activity percentage and event counts |
 | `*_metadata.json` | Effective settings, tool/model/source hashes, model revisions, native component status, coverage and crop/time mapping |
 | `*_preview.jpg` | Representative rendered frame |
 | `face_analysis.jsonl` | Native face measurements joined to HMAD labels on the 25 fps analysis timeline |
 | `face_annotations.jsonl`, `head_cycles.jsonl` | Quality-masked native intervals and completed head-cycle details |
 | `native/` | Analysis clip, original OpenFace CSV/logs, canonical HMAD exports, working/native tables and available ELAN annotations |
 
-CSV uses `1` for true, `0` for false, blank for unknown. Native HMAD intervals
+Frame CSV uses `1` for true, `0` for false, blank for unknown. Native HMAD intervals
 and completed cycles bypass the common 0.25 s posture gate. Holding uses its own
 0.4 s confirmation. Event CSV rows are emitted as available, not globally sorted;
 use timestamps when ordering them. Interrupted runs can leave partial outputs;
 only a successful run writes the final metadata file.
+
+## Gesture duration windows
+
+Recognition runs continuously across the selected video; window boundaries do
+not reset tracking or confirmation. The existing frame-level labels and video
+overlays remain available. OpenFace/HMAD still performs offline sequence analysis;
+this export does not add live camera recognition. The window CSV is written when
+analysis finishes and uses **video time**, regardless of processing speed.
+
+The default windows are `[0,30)`, `[30,60)`, `[60,90)`, and so on. The last window
+can be shorter. A `--seconds 120` selection produces exactly four windows, even
+when the encoded video includes a fractional final frame at 29.97 fps. Full-video
+runs summarize the entire decoded duration. Change the window size if needed:
+
+```sh
+# Four consecutive 30-second windows; teaching-aid detection stays off.
+python main.py --seconds 120 --output-dir outputs/gesture_windows_2min
+
+# Entire source, with a shorter summary interval.
+python main.py --full-video --window-seconds 15 --output-dir outputs/gesture_windows_15s
+```
+
+Each row identifies `window_index` (starting at 1), `window_start_s`,
+`window_end_s_exclusive`, `window_duration_s`, and `behaviour`. Its measurements are:
+
+| Column | Meaning |
+| --- | --- |
+| `active_seconds` | Total confirmed gesture duration within the window; overlapping/adjacent positive intervals are merged |
+| `inactive_seconds` | Observable time without that confirmed gesture, including candidates awaiting confirmation |
+| `observed_seconds` | Time for which that behaviour has a known frame-level state |
+| `unknown_seconds` | Missing/invalid detection time, including disabled branches |
+| `active_percent_observed` | `100 × active_seconds / observed_seconds` |
+| `event_count` | Episodes starting in this window; completed head cycles are counted in their completion window |
+| `count_basis` | `episode_start` or `cycle_completion` |
+| `events_overlapping` | Episodes/cycles with observable active time in this window, including those starting earlier |
+
+“Frequency in seconds” is represented by `active_seconds`; `event_count` supplies
+the separate occurrence count. For example, a smile from 29 to 32 seconds adds
+1 active second to the first window and 2 to the second. Its event count is 1
+in the first window and 0 in the second; `events_overlapping` is 1 in both.
+
+Durations use confirmed event intervals intersected with known frame coverage.
+Native facial intervals retain their subframe timing. Nods/shakes use the motion
+span of completed cycles, rather than their single completion-frame label. Cycles
+not completed within the selected prefix are excluded. Unknown gaps split observed
+episodes. For each behaviour, active + inactive = observed, and observed + unknown
+= window duration (subject to six-decimal rounding). Different behaviours can
+overlap, so their durations should not be summed into total video length.
+When a behaviour is wholly unknown in a window, activity, percentage and counts
+are blank; observed time is zero. A disabled teaching-aid detector therefore
+does not report a false zero-duration detection result.
+
+To generate a window CSV from existing frame/event exports without rerunning models:
+
+```sh
+python window_summary.py --metadata "/prior/run/video_metadata.json"
+# Older 120s runs may contain an encoded fractional tail; select the exact prefix:
+python window_summary.py --metadata "/prior/run/video_metadata.json" --duration-seconds 120
+```
+
+The helper writes/replaces only `*_windows.csv` (or the path given by `--output`).
+New runs record window settings, coverage policy and the CSV path in metadata.
 
 ## Verification
 
@@ -213,7 +278,8 @@ python main.py --check-dependencies
 The tests cover existing body/hand geometry plus native timestamp joins, 25 fps
 validation, HMAD quality/unknown masks, short blinks, head rotation and completed
 cycles, camera zoom/cuts, head-only leaning, hand/object contact, ambiguity,
-confirmation resets, and imported native results merged into an encoded video.
+confirmation resets, window boundaries/duration accounting and unknown coverage,
+and imported native results merged into an encoded video and window CSV.
 Runtime verification results are recorded in generated output directories.
 Successful execution does not establish detection accuracy; annotated classroom
 clips are still needed to measure errors and tune thresholds.
@@ -222,7 +288,8 @@ Verified on 12 November 2026:
 
 | Check | Result |
 | --- | --- |
-| Automated tests | 45 passed, including default-off and explicit on/off detector selection |
+| Automated tests | 56 passed, including detector selection, window timing and CSV integration |
+| 30-second window export | Existing 2-minute body/face results summarized into 4 windows × 51 behaviours = 204 rows; body durations cross-checked against frame states and head-cycle counts against events; see `outputs/calculus_2min_test/*_windows.csv` |
 | Native OpenFace extraction | 751 analysis frames at 25 fps covering the 30-second lecture selection |
 | Current HMAD bridge | Head model, AUs, smiles, brows, blink model, gaze model and ELAN export all succeeded; see `outputs/native_current_verified/` |
 | Native/body video run | 900 source frames decoded and matched 900 CSV rows, 30.03 s; see `outputs/openface_hmad_30s_final/verification.json` |

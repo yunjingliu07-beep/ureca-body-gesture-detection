@@ -2,8 +2,8 @@
 
 Runs OpenFace/HMAD offline, merges body/hand/object observations by source time,
 and writes a translucent person mask with skeleton, face, gaze and held objects.
-Confirmed behaviours appear in the upper-right corner. Frame CSV, event CSV,
-and metadata JSON preserve the rules and measurements for manual review.
+Confirmed behaviours appear in the upper-right corner. Frame, event and window
+CSVs and metadata JSON preserve measurements and gesture durations for review.
 
 Default: python main.py (first 30 seconds of the Calculus 1 Lecture 0.1 video).
 Teaching-aid detection is off by default; select --teaching-aids on to enable it.
@@ -35,6 +35,7 @@ from tracking_config import (FaceRules, HeadRules, GazeRules, CameraMovementRule
 from camera_movement import CAMERA_LABELS, CameraGuard, CameraMovementDetector
 from native_tracking import prepare_native, resolve_executable, sha256
 from teaching_aids import OBJECT_LABELS, GroundingDinoDetector, TeachingAidTracker
+from window_summary import write_window_summary
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -188,6 +189,8 @@ def build_parser():
     duration = parser.add_mutually_exclusive_group()
     duration.add_argument("--seconds", type=float, default=30, help="First N seconds; default: 30")
     duration.add_argument("--full-video", dest="seconds", action="store_const", const=None)
+    parser.add_argument("--window-seconds", type=float, default=30.0,
+                        help="Consecutive gesture-summary windows in source seconds; default: 30")
     parser.add_argument("--pose-model", type=Path, default=PROJECT_DIR / "models/pose_landmarker_full.task")
     parser.add_argument("--hand-model", type=Path, default=PROJECT_DIR / "models/hand_landmarker.task")
     local_openface = PROJECT_DIR / "external/OpenFace/build/bin/FeatureExtraction"
@@ -257,6 +260,8 @@ def main(argv=None):
         return report
     if args.seconds is not None and (not math.isfinite(args.seconds) or args.seconds <= 0):
         parser.error("--seconds must be positive and finite")
+    if not math.isfinite(args.window_seconds) or args.window_seconds <= 0:
+        parser.error("--window-seconds must be positive and finite")
     if not 0 <= args.mask_opacity <= 1 or not 0 <= args.mask_threshold <= 1:
         parser.error("Invalid mask settings")
     if not all(math.isfinite(v) for v in args.teacher_roi) or not (0 <= args.teacher_roi[0] < args.teacher_roi[2] <= 1 and 0 <= args.teacher_roi[1] < args.teacher_roi[3] <= 1):
@@ -318,7 +323,8 @@ def main(argv=None):
             csv_path, hmad_directory, native_manifest = prepare_native(args, args.output_dir / "native", duration_s, roi)
             face_assets = build_face_timeline(csv_path, hmad_directory, args.output_dir / "face_analysis.jsonl", tracking, cut_times)
         paths = {key: args.output_dir / f"{args.input.stem}_{key}.{extension}" for key, extension in
-                 (("behaviours", "mp4"), ("frames", "csv"), ("events", "csv"), ("metadata", "json"), ("preview", "jpg"))}
+                 (("behaviours", "mp4"), ("frames", "csv"), ("events", "csv"), ("windows", "csv"),
+                  ("metadata", "json"), ("preview", "jpg"))}
         video = cv2.VideoWriter(str(paths["behaviours"]), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
         stack.callback(video.release)
         if not video.isOpened():
@@ -423,12 +429,18 @@ def main(argv=None):
                 with face_assets[key].open() as handle:
                     for line in handle:
                         events.annotation(json.loads(line), timing, duration_s)
+    # Encoded output includes the last whole source frame. Clip its fractional
+    # tail to --seconds so a 120-second selection has exactly four 30s windows.
+    summary_duration = min(count/fps, args.seconds) if args.seconds is not None else count/fps
+    window_summary = write_window_summary(paths["frames"], paths["events"], paths["windows"],
+                                          fps, summary_duration, args.window_seconds, count)
     metadata = {"input": str(args.input.resolve()), "fps": fps, "width": width, "height": height,
         "processed_frames": count, "duration_s": count/fps, "teacher_roi_px": roi,
         "frames_with_pose": pose_count, "frames_with_face": face_count, "mediapipe_version": mp.__version__,
         "body": asdict(body_rules), "tracking": asdict(tracking), "scene": scene, "confirmation_s": confirmation,
         "native": native_manifest, "objects": None if object_detector is None else object_detector.metadata,
         "teaching_aid_detection": {"requested": args.teaching_aids, "enabled": objects_enabled},
+        "window_summary": window_summary,
         "coverage": {**coverage, "face_analysis": None if face_assets is None else face_assets["coverage"]},
         "ignored_zero_duration_intervals": None if face_assets is None else face_assets["ignored_zero_duration_intervals"],
         "cut_times_s": cut_times, "processing_seconds": time.monotonic()-started,
@@ -443,6 +455,7 @@ def main(argv=None):
         "outputs": {name: str(path.resolve()) for name, path in paths.items()}}
     paths["metadata"].write_text(json.dumps(metadata, indent=2, allow_nan=False)+"\n")
     print(f"Saved {count} frames ({count/fps:.2f}s): {paths['behaviours']}")
+    print(f"Saved {window_summary['window_count']} gesture windows: {paths['windows']}")
     return metadata
 
 
