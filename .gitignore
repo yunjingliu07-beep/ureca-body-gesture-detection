@@ -1,5 +1,11 @@
 # Local data, generated results, and downloaded model weights.
 outputs/
+external/
+models/hf-cache/
+*.pt
+*.pth
+*.safetensors
+.runtime/
 *.mp4
 *.avi
 *.mov

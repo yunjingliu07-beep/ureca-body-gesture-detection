@@ -114,7 +114,7 @@ class BehaviourTests(unittest.TestCase):
         detector = BodyGestureDetector(1000, 1000, scene={"board_yaw_deg": 180, "class_yaw_deg": 0})
         for index in range(16):
             states, info = detector.update(*body(yaw=150 + index * 4), index / 10)
-        self.assertIsNone(states["turning"])
+        self.assertNotIn("turning", states)
         self.assertTrue(states["facing_board"])
         self.assertFalse(states["facing_class"])
         pose, world = body(yaw=90)
@@ -153,16 +153,13 @@ class BehaviourTests(unittest.TestCase):
         self.assertTrue(states["standing_beside_desk"])
 
     def test_face_missing_data_and_separate_brow_rules(self):
-        states, _ = classify_expressions({})
+        states = classify_expressions()
         self.assertTrue(all(value is None for value in states.values()))
-        scores = dict(mouth_smile_left=0.7, mouth_smile_right=0.5, brow_inner_up=0.5,
-                      brow_outer_up_left=0.1, brow_outer_up_right=0.1,
-                      brow_down_left=0.2, brow_down_right=0.1)
-        states, _ = classify_expressions(scores)
+        states = classify_expressions("S2", "A", "N")
         self.assertTrue(states["smiling"])
         self.assertTrue(states["brow_raising"])
         self.assertFalse(states["brow_lowering"])
-        states, _ = classify_expressions(scores, detected=False)
+        states = classify_expressions("S4", "A", "B", valid=False)
         self.assertTrue(all(value is None for value in states.values()))
 
     def test_geometry_config_and_mask(self):

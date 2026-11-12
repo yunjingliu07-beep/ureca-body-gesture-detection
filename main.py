@@ -1,7 +1,7 @@
 """Combine body gestures and facial expressions into an annotated video.
 
-Reads a video once, imports BodyGestureExtractor and FacialExpressionExtractor,
-and writes a translucent person mask with skeleton/face/hand landmarks on top.
+Runs OpenFace/HMAD offline, merges body/hand/object observations by source time,
+and writes a translucent person mask with skeleton, face, gaze and held objects.
 Confirmed behaviours appear in the upper-right corner. Frame CSV, event CSV,
 and metadata JSON preserve the rules and measurements for manual review.
 
@@ -28,7 +28,12 @@ import numpy as np
 
 from behaviour_common import TemporalGate
 from body_gestures import BODY_LABELS, DEFAULT_SCENE, BodyGestureExtractor, BodyRules, validate_scene
-from facial_expressions import FACE_LABELS, FaceRules, FacialExpressionExtractor
+from facial_expressions import FACE_LABELS, DIRECT_LABELS, FacialExpressionExtractor, build_face_timeline
+from tracking_config import (FaceRules, HeadRules, GazeRules, CameraMovementRules,
+                             TeachingAidRules, TrackingRules)
+from camera_movement import CAMERA_LABELS, CameraGuard, CameraMovementDetector
+from native_tracking import prepare_native, resolve_executable, sha256
+from teaching_aids import OBJECT_LABELS, GroundingDinoDetector, TeachingAidTracker
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -39,10 +44,13 @@ DEFAULT_INPUT = PROJECT_DIR / (
 
 def load_settings(path=None):
     settings = json.loads(path.read_text()) if path else {}
-    if set(settings) - {"body", "face", "scene", "confirmation_s"}:
-        raise ValueError("Config accepts only body, face, scene, and confirmation_s")
+    allowed = {"body", "face", "head", "gaze", "camera_motion", "objects", "scene", "confirmation_s"}
+    if set(settings) - allowed:
+        raise ValueError(f"Unknown config sections: {sorted(set(settings) - allowed)}")
     body = BodyRules(**settings.get("body", {}))
-    face = FaceRules(**settings.get("face", {}))
+    face = TrackingRules(FaceRules(**settings.get("face", {})), HeadRules(**settings.get("head", {})),
+                         GazeRules(**settings.get("gaze", {})), CameraMovementRules(**settings.get("camera_motion", {})),
+                         TeachingAidRules(**settings.get("objects", {})))
     scene = {**DEFAULT_SCENE, **settings.get("scene", {})}
     validate_scene(scene)
     confirmation = settings.get("confirmation_s", 0.25)
@@ -83,6 +91,13 @@ def draw_panel(frame, states, info, timestamp_s):
     panel_w = min(width - 8, max(150, round(width * 0.38)))
     x, y = max(0, width - panel_w - 8), 8
     lines = [f"Behaviours | {timestamp_s:.2f}s"]
+    if info.get("smile_level"):
+        lines.append("Smile level: " + info["smile_level"])
+    held = info.get("held_objects", [])
+    if held:
+        lines.append("Teaching aids: " + ", ".join(sorted({o["class"] + " (" + o["hand"] + ")" for o in held})))
+    elif "holding_status" in info:
+        lines.append("Teaching aids: " + info["holding_status"].replace("_", " "))
     active = [label for label, value in states.items() if value is True]
     for label in active:
         text = label.replace("_", " ")
@@ -125,12 +140,13 @@ def draw_panel(frame, states, info, timestamp_s):
 
 
 class EventWriter:
-    """Write confirmed episodes as they end, without holding a clip in memory."""
+    """Export gated frame episodes and native-timed intervals/cycles without duplicates."""
 
     def __init__(self, writer, fps):
         self.writer, self.fps, self.active = writer, fps, {}
         writer.writerow(["behaviour", "start_frame", "end_frame_exclusive", "start_s",
-                         "end_s_exclusive", "duration_s"])
+                         "end_s_exclusive", "duration_s", "timing_type", "source",
+                         "completion_s", "peak_s", "native_value"])
 
     def update(self, states, frame_index):
         for label, value in states.items():
@@ -141,8 +157,20 @@ class EventWriter:
 
     def end(self, label, end):
         start = self.active.pop(label)
-        self.writer.writerow([label, start, end, f"{start / self.fps:.6f}",
-                              f"{end / self.fps:.6f}", f"{(end - start) / self.fps:.6f}"])
+        source = ("teaching_aid_heuristic" if label in OBJECT_LABELS else
+                  "camera_movement_heuristic" if label in CAMERA_LABELS else
+                  "OpenFace_pose_gaze" if label in FACE_LABELS else "MediaPipe_body")
+        self.writer.writerow([label, start, end, f"{start/self.fps:.6f}", f"{end/self.fps:.6f}",
+                              f"{(end-start)/self.fps:.6f}", "confirmed_posture", source, "", "", ""])
+
+    def annotation(self, record, timing_type, duration_s):
+        start, end = max(0, record["start_s"]), min(duration_s, record["end_s"])
+        if end <= start:
+            return
+        self.writer.writerow([record["behaviour"], math.ceil(start*self.fps-1e-8),
+                              math.ceil(end*self.fps-1e-8), f"{start:.6f}", f"{end:.6f}", f"{end-start:.6f}",
+                              timing_type, "OpenFace_cycle" if timing_type == "completed_cycle" else "HMAD",
+                              record.get("completion_s", ""), record.get("peak_s", ""), record.get("native_value", "")])
 
     def close(self, count):
         for label in list(self.active):
@@ -151,40 +179,98 @@ class EventWriter:
 
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT,
-                        help="Source video; default: Calculus 1 Lecture 0.1 in the project folder")
+    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
     parser.add_argument("--output-dir", type=Path, default=PROJECT_DIR / "outputs/behaviours")
     parser.add_argument("--config", type=Path)
     duration = parser.add_mutually_exclusive_group()
-    duration.add_argument("--seconds", type=float, default=30, help="Process the first N seconds; default: 30")
-    duration.add_argument("--full-video", dest="seconds", action="store_const", const=None,
-                          help="Process the entire video instead of the default 30-second test")
+    duration.add_argument("--seconds", type=float, default=30, help="First N seconds; default: 30")
+    duration.add_argument("--full-video", dest="seconds", action="store_const", const=None)
     parser.add_argument("--pose-model", type=Path, default=PROJECT_DIR / "models/pose_landmarker_full.task")
-    parser.add_argument("--face-model", type=Path, default=PROJECT_DIR / "models/face_landmarker.task")
     parser.add_argument("--hand-model", type=Path, default=PROJECT_DIR / "models/hand_landmarker.task")
-    parser.add_argument("--no-face", action="store_true")
-    parser.add_argument("--no-hands", action="store_true", help="Finger pointing stays unknown; coarse arm direction remains available")
+    local_openface = PROJECT_DIR / "external/OpenFace/build/bin/FeatureExtraction"
+    parser.add_argument("--openface-bin", default=os.environ.get("OPENFACE_BIN", str(local_openface) if local_openface.is_file() else "FeatureExtraction"))
+    parser.add_argument("--hmad-dir", type=Path, default=PROJECT_DIR / "external/HMAD")
+    local_rscript = PROJECT_DIR / ".runtime/r/bin/Rscript"
+    parser.add_argument("--rscript", default=str(local_rscript) if local_rscript.is_file() else "Rscript")
+    parser.add_argument("--ffmpeg", default="ffmpeg")
+    parser.add_argument("--openface-csv", type=Path, help="Import OpenFace output from a matching 25 fps, zero-start clip")
+    parser.add_argument("--hmad-results", type=Path, help="Import canonical HMAD results with matching manifest.json")
+    parser.add_argument("--no-face", action="store_true", help="Explicitly disable head/expression/gaze/depth analysis")
+    parser.add_argument("--no-hands", action="store_true", help="Hand/object holding and finger pointing become unknown")
+    parser.add_argument("--no-objects", action="store_true", help="Explicitly disable teaching-aid detection")
+    parser.add_argument("--objects-model", default="IDEA-Research/grounding-dino-tiny")
+    parser.add_argument("--objects-revision", default="a2bb814dd30d776dcf7e30523b00659f4f141c71", help="HF revision or commit, recorded in metadata")
+    parser.add_argument("--objects-device", choices=("cpu", "mps", "cuda"), default="cpu")
+    parser.add_argument("--teacher-roi", nargs=4, type=float, metavar=("X0", "Y0", "X1", "Y1"),
+                        default=(0, 0, 1, 1), help="Fixed normalized crop containing only the teacher")
+    parser.add_argument("--check-dependencies", action="store_true", help="Report required tools/models without running analysis")
     parser.add_argument("--view", choices=("overlay", "mask", "skeleton"), default="overlay")
-    parser.add_argument("--mask-opacity", type=float, default=0.30)
-    parser.add_argument("--mask-threshold", type=float, default=0.5)
-    parser.add_argument("--show-scene", action="store_true", help="Draw annotated zone, group and desk polygons")
+    parser.add_argument("--mask-opacity", type=float, default=.30)
+    parser.add_argument("--mask-threshold", type=float, default=.5)
+    parser.add_argument("--show-scene", action="store_true")
     return parser
+
+
+def dependency_report(args):
+    import importlib.util
+    import shutil
+    return {"FeatureExtraction": shutil.which(str(args.openface_bin)), "Rscript": shutil.which(args.rscript),
+            "ffmpeg": shutil.which(args.ffmpeg), "HMAD": (args.hmad_dir / "sourceR").is_dir(),
+            "pose_model": args.pose_model.is_file(), "hand_model": args.hand_model.is_file(),
+            **{name: importlib.util.find_spec(name) is not None for name in ("mediapipe", "torch", "transformers")}}
+
+
+def scan_cut_times(path, duration_s, fps, roi, threshold):
+    cap = cv2.VideoCapture(str(path))
+    previous, cuts, count = None, [], 0
+    x0, y0, x1, y1 = roi
+    try:
+        while count/fps < duration_s - 1e-9:
+            ok, frame = cap.read()
+            if not ok:
+                break
+            gray = cv2.cvtColor(cv2.resize(frame[y0:y1, x0:x1], (160, 90)), cv2.COLOR_BGR2GRAY)
+            if previous is not None and float(np.mean(cv2.absdiff(gray, previous))/255) >= threshold:
+                cuts.append(count/fps)
+            previous = gray
+            count += 1
+    finally:
+        cap.release()
+    return cuts
 
 
 def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.check_dependencies:
+        report = dependency_report(args)
+        print(json.dumps(report, indent=2))
+        return report
     if args.seconds is not None and (not math.isfinite(args.seconds) or args.seconds <= 0):
-        parser.error("--seconds must be a positive finite number")
+        parser.error("--seconds must be positive and finite")
     if not 0 <= args.mask_opacity <= 1 or not 0 <= args.mask_threshold <= 1:
-        parser.error("Mask opacity and threshold must be between 0 and 1")
+        parser.error("Invalid mask settings")
+    if not all(math.isfinite(v) for v in args.teacher_roi) or not (0 <= args.teacher_roi[0] < args.teacher_roi[2] <= 1 and 0 <= args.teacher_roi[1] < args.teacher_roi[3] <= 1):
+        parser.error("--teacher-roi must satisfy 0 <= X0 < X1 <= 1 and 0 <= Y0 < Y1 <= 1")
     try:
-        body_rules, face_rules, scene, confirmation = load_settings(args.config)
-    except (ValueError, TypeError, OSError) as error:
+        body_rules, tracking, scene, confirmation = load_settings(args.config)
+        if not args.no_face:
+            if args.hmad_results and not args.openface_csv:
+                raise ValueError("--hmad-results requires its matching --openface-csv")
+            if not args.openface_csv:
+                resolve_executable(args.openface_bin, "OpenFace FeatureExtraction")
+                resolve_executable(args.ffmpeg, "ffmpeg")
+            if not args.hmad_results:
+                resolve_executable(args.rscript, "Rscript")
+                if not (args.hmad_dir / "sourceR").is_dir():
+                    raise ValueError("HMAD is missing; run setup_tracking.py --download-hmad")
+        if not args.no_objects and not args.no_hands:
+            import importlib.util
+            if any(importlib.util.find_spec(name) is None for name in ("torch", "transformers")):
+                raise ValueError("Object detection dependencies missing; install requirements-objects.txt")
+    except (ValueError, OSError, TypeError) as error:
         parser.error(str(error))
     models = {"pose": args.pose_model}
-    if not args.no_face:
-        models["face"] = args.face_model
     if not args.no_hands:
         models["hands"] = args.hand_model
     for name, path in models.items():
@@ -192,118 +278,156 @@ def main(argv=None):
             parser.error(f"Missing {name} model: {path}; see models/README.md")
     if not args.input.is_file():
         parser.error(f"Input not found: {args.input}")
+    if args.output_dir.exists() and any(args.output_dir.iterdir()):
+        parser.error("Output directory is not empty; choose a new --output-dir")
+    args.output_dir.mkdir(parents=True, exist_ok=True)
     import mediapipe as mp
+    native_manifest, face_assets = None, None
+    started = time.monotonic()
     with ExitStack() as stack:
         cap = cv2.VideoCapture(str(args.input))
         stack.callback(cap.release)
         if not cap.isOpened():
             raise RuntimeError(f"Cannot open video: {args.input}")
-        fps = cap.get(cv2.CAP_PROP_FPS)
+        fps, total = cap.get(cv2.CAP_PROP_FPS), int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         width, height = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        if not math.isfinite(fps) or fps <= 0 or width < 32 or height < 32:
-            raise RuntimeError("Invalid FPS or frame dimensions (minimum 32 x 32)")
-        limit = math.ceil(args.seconds * fps) if args.seconds is not None else None
-        args.output_dir.mkdir(parents=True, exist_ok=True)
+        if not math.isfinite(fps) or fps <= 0 or total <= 0 or min(width, height) < 32:
+            raise RuntimeError("Invalid video metadata / frame dimensions")
+        limit = min(total, math.ceil(args.seconds*fps)) if args.seconds is not None else total
+        duration_s = limit/fps
+        roi = tuple(round(v*s) for v, s in zip(args.teacher_roi, (width, height, width, height)))
+        x0, y0, x1, y1 = roi
+        if min(x1-x0, y1-y0) < 32:
+            raise ValueError("Teacher ROI must be at least 32 x 32 pixels")
+        roi_width, roi_height = x1-x0, y1-y0
+        cut_times = scan_cut_times(args.input, duration_s, fps, roi, tracking.camera_motion.cut_difference)
+        if not args.no_face:
+            csv_path, hmad_directory, native_manifest = prepare_native(args, args.output_dir / "native", duration_s, roi)
+            face_assets = build_face_timeline(csv_path, hmad_directory, args.output_dir / "face_analysis.jsonl", tracking, cut_times)
         paths = {key: args.output_dir / f"{args.input.stem}_{key}.{extension}" for key, extension in
                  (("behaviours", "mp4"), ("frames", "csv"), ("events", "csv"), ("metadata", "json"), ("preview", "jpg"))}
-        # Prevent accidental replacement of either the source or a previous analysis.
-        for path in paths.values():
-            if path.exists() or path.resolve() == args.input.resolve():
-                parser.error(f"Output already exists: {path}. Choose a different --output-dir.")
         video = cv2.VideoWriter(str(paths["behaviours"]), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
         stack.callback(video.release)
         if not video.isOpened():
-            raise RuntimeError("Cannot create MP4 output")
-        body = stack.enter_context(BodyGestureExtractor(args.pose_model, width, height, body_rules, scene,
+            raise RuntimeError("Cannot create output MP4")
+        body = stack.enter_context(BodyGestureExtractor(args.pose_model, roi_width, roi_height, body_rules, scene,
                                                        None if args.no_hands else args.hand_model))
-        face = None if args.no_face else stack.enter_context(FacialExpressionExtractor(args.face_model, face_rules))
+        face = None if face_assets is None else stack.enter_context(FacialExpressionExtractor(face_assets["timeline"], face_assets["cycles"]))
+        objects, object_detector = None, None
+        if not args.no_objects and not args.no_hands:
+            object_detector = stack.enter_context(GroundingDinoDetector(args.objects_model, args.objects_revision,
+                args.objects_device, tracking.objects, str(PROJECT_DIR / "models/hf-cache")))
+            objects = TeachingAidTracker(object_detector, tracking.objects, body_rules.visibility)
+        motion = CameraMovementDetector(tracking.camera_motion, body_rules.visibility)
+        guard = CameraGuard(tracking.camera_motion)
         frame_file = stack.enter_context(paths["frames"].open("w", newline=""))
         event_file = stack.enter_context(paths["events"].open("w", newline=""))
-        labels = (*BODY_LABELS, *FACE_LABELS)
+        labels = (*BODY_LABELS, *FACE_LABELS, *CAMERA_LABELS, *OBJECT_LABELS)
         columns = ["frame_index", "timestamp_s", "pose_detected", "face_detected",
-                   *["raw_" + name for name in labels], *labels, "measurements_json", "face_scores_json"]
+                   *["raw_"+name for name in labels], *labels, "smile_level", "holding_status", "held_object_types",
+                   "measurements_json", "face_scores_json"]
         writer = csv.DictWriter(frame_file, fieldnames=columns)
         writer.writeheader()
         events = EventWriter(csv.writer(event_file), fps)
         gate = TemporalGate(confirmation)
-        count, pose_count, face_count = 0, 0, 0
-        preview_quality = None
-        last_ms = -1
-        started = time.monotonic()
-        while limit is None or count < limit:
+        preview_quality, last_ms = None, -1
+        count = pose_count = face_count = 0
+        coverage = {"camera_motion": 0, "objects": 0}
+        while count < limit:
             ok, frame = cap.read()
             if not ok:
-                expected = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-                if expected > 0 and count < expected and (limit is None or count < limit):
-                    raise RuntimeError(f"Video decoding failed at frame {count}; outputs are incomplete")
-                break
-            t = count / fps
-            timestamp_ms = max(last_ms + 1, round(t * 1000))
+                raise RuntimeError(f"Video decoding failed at frame {count}; outputs are incomplete")
+            t, end = count/fps, (count+1)/fps
+            crop = frame[y0:y1, x0:x1]
+            timestamp_ms = max(last_ms+1, round(t*1000))
             last_ms = timestamp_ms
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
-            face_states, face_info, scores = (dict.fromkeys(FACE_LABELS), {}, {}) if face is None else face.process(image, timestamp_ms, width, height)
-            raw, info, mask, _, _ = body.process(image, timestamp_ms, t,
-                                                face_landmarks=None if face is None else face.landmarks)
-            raw.update(face_states)
+            image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
+            raw, info, mask, pose, _ = body.process(image, timestamp_ms, t)
+            camera_info = guard.update(crop, t, mask)
+            face_raw, face_info, scores = (dict.fromkeys(FACE_LABELS), {"face_detected": False}, {}) if face is None else face.process(t, end)
+            if camera_info["camera_cut"]:
+                gate = TemporalGate(confirmation)
+                body.detector._reset()
+                for history in body.detector.hand_history.values():
+                    history.clear()
+                raw = dict.fromkeys(BODY_LABELS)
+                face_raw = dict.fromkeys(FACE_LABELS)
+                face_info.update(face_valid=False, head_valid=False, face_reason="camera_cut")
+                if objects:
+                    objects.reset()
+            camera_raw, camera_measurements = motion.update(t, face_info.get("head_depth_mm") if face_info.get("head_valid") else None,
+                pose, roi_width, roi_height, info.get("torso_yaw_deg"), camera_info["camera_stable"])
+            raw.update(face_raw)
+            raw.update(camera_raw)
             info.update(face_info)
-            face_detected = bool(scores)
-            states = gate.update(raw, t)
-            output = render_mask(frame, mask, args.view, args.mask_opacity, args.mask_threshold)
+            info.update(camera_info)
+            info.update(camera_measurements)
+            object_raw, object_states, object_info = (dict.fromkeys(OBJECT_LABELS), dict.fromkeys(OBJECT_LABELS),
+                {"holding_status": "unknown", "held_objects": [], "object_reason": "disabled_or_hands_disabled"}) if objects is None else objects.process(crop, t, pose, body.hand_observations)
+            raw.update(object_raw)
+            info.update(object_info)
+            states = gate.update({k: v for k, v in raw.items() if k not in DIRECT_LABELS and k not in OBJECT_LABELS}, t)
+            states.update({k: raw[k] for k in DIRECT_LABELS})
+            states.update(object_states)
+            output = frame.copy() if args.view == "overlay" else np.zeros_like(frame)
+            output[y0:y1, x0:x1] = render_mask(crop, mask, args.view, args.mask_opacity, args.mask_threshold)
+            rendered_crop = output[y0:y1, x0:x1]
             if args.show_scene:
-                draw_scene(output, scene)
-            body.draw(output)
-            if face is not None:
-                face.draw(output)
+                draw_scene(rendered_crop, scene)
+            body.draw(rendered_crop)
+            if face is not None and face_info.get("face_valid"):
+                face.draw(rendered_crop)
+            if objects:
+                objects.draw(rendered_crop)
             draw_panel(output, states, info, t)
             video.write(output)
-            # Prefer a visible skeleton with confirmed labels over opening titles.
             quality = (bool(info["pose_detected"]), any(v is True for v in states.values()),
-                       len(body.points), face_detected)
+                       len(body.points), bool(info.get("face_valid")))
             if preview_quality is None or quality > preview_quality:
                 if not cv2.imwrite(str(paths["preview"]), output):
-                    raise RuntimeError("Cannot write preview image")
+                    raise RuntimeError("Cannot write preview")
                 preview_quality = quality
-            row = {"frame_index": count, "timestamp_s": f"{t:.6f}",
-                   "pose_detected": int(info["pose_detected"]), "face_detected": int(face_detected),
-                   "measurements_json": json.dumps(info, allow_nan=False),
-                   "face_scores_json": json.dumps(scores, allow_nan=False)}
+            row = {"frame_index": count, "timestamp_s": f"{t:.6f}", "pose_detected": int(info["pose_detected"]),
+                   "face_detected": int(info.get("face_detected", False)), "smile_level": info.get("smile_level") or "",
+                   "holding_status": info["holding_status"], "held_object_types": ",".join(sorted({o["class"] for o in info["held_objects"]})),
+                   "measurements_json": json.dumps(info, allow_nan=False), "face_scores_json": json.dumps(scores, allow_nan=False)}
             for name in labels:
-                row["raw_" + name] = "" if raw[name] is None else int(raw[name])
+                row["raw_"+name] = "" if raw[name] is None else int(raw[name])
                 row[name] = "" if states[name] is None else int(states[name])
             writer.writerow(row)
-            events.update(states, count)
+            events.update({k: v for k, v in states.items() if k not in DIRECT_LABELS}, count)
             pose_count += int(info["pose_detected"])
-            face_count += int(face_detected)
+            face_count += int(info.get("face_valid", False))
+            coverage["camera_motion"] += int(camera_raw["moving_toward_camera"] is not None)
+            coverage["objects"] += int(object_raw["holding_teaching_aid"] is not None)
             count += 1
-            if count % max(1, round(fps * 10)) == 0:
-                print(f"Processed {count} frames ({count / fps:.1f}s), {count / (time.monotonic() - started):.1f} frames/s", flush=True)
-        if count == 0:
-            raise RuntimeError("No frames decoded; outputs are incomplete")
+            if count % max(1, round(fps*10)) == 0:
+                print(f"Processed {count}/{limit} frames ({count/fps:.1f}s)", flush=True)
         events.close(count)
-    metadata = {
-        "input": str(args.input.resolve()), "fps": fps, "width": width, "height": height,
-        "processed_frames": count, "duration_s": count / fps,
-        "frames_with_pose": pose_count, "frames_with_face": face_count,
-        "mediapipe_version": mp.__version__, "view": args.view,
-        "mask_opacity": args.mask_opacity, "mask_threshold": args.mask_threshold,
-        "body": asdict(body_rules), "face": asdict(face_rules), "scene": scene,
-        "confirmation_s": confirmation,
-        "models": {name: {"path": str(path.resolve()), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
-                   for name, path in models.items()},
-        "notes": ["One visible speaker; no active-speaker identification or persistent person tracking.",
-                  "Fixed-camera, constant-frame-rate video assumed; scene geometry is image-relative, not room-calibrated.",
-                  "Silent MP4; original audio is not copied.",
-                  "CSV: 1=true, 0=false, blank=unknown. Raw columns precede temporal confirmation.",
-                  "Events describe confirmed video labels; their starts exclude the initial confirmation delay.",
-                  "Rules are reviewable heuristics, not validated activity or emotion recognition.",
-                  "Back-of-classroom camera: default class yaw is 0 (toward camera), board yaw is 180 (away).",
-                  "Facing labels use torso yaw; turning labels use face-skeleton center relative to shoulder-midpoint neck, in image left/right coordinates.",
-                  "Face and hand models run independently; person association is not implemented."],
-        "outputs": {name: str(path.resolve()) for name, path in paths.items()},
-    }
-    paths["metadata"].write_text(json.dumps(metadata, indent=2, allow_nan=False) + "\n")
-    print(f"Saved {count} frames ({count / fps:.2f}s): {paths['behaviours']}")
+        if face_assets:
+            for key, timing in (("annotations", "hmad_interval"), ("cycles", "completed_cycle")):
+                with face_assets[key].open() as handle:
+                    for line in handle:
+                        events.annotation(json.loads(line), timing, duration_s)
+    metadata = {"input": str(args.input.resolve()), "fps": fps, "width": width, "height": height,
+        "processed_frames": count, "duration_s": count/fps, "teacher_roi_px": roi,
+        "frames_with_pose": pose_count, "frames_with_face": face_count, "mediapipe_version": mp.__version__,
+        "body": asdict(body_rules), "tracking": asdict(tracking), "scene": scene, "confirmation_s": confirmation,
+        "native": native_manifest, "objects": None if object_detector is None else object_detector.metadata,
+        "coverage": {**coverage, "face_analysis": None if face_assets is None else face_assets["coverage"]},
+        "ignored_zero_duration_intervals": None if face_assets is None else face_assets["ignored_zero_duration_intervals"],
+        "cut_times_s": cut_times, "processing_seconds": time.monotonic()-started,
+        "models": {name: {"path": str(path.resolve()), "sha256": sha256(path)} for name, path in models.items()},
+        "notes": ["One selected teacher; use --teacher-roi for a fixed single-speaker crop.",
+                  "Fixed camera and constant source frame rate; silent output MP4.",
+                  "Face backend is OpenFace/HMAD with no legacy facial fallback.",
+                  "Camera-relative movement and hand/object contact are unvalidated project heuristics.",
+                  "No target object observed does not prove an empty hand; object classes are configured.",
+                  "Native HMAD intervals and completed cycles bypass the posture confirmation gate.",
+                  "Head/gaze directions are image directions; reference gaze requires explicit calibration."],
+        "outputs": {name: str(path.resolve()) for name, path in paths.items()}}
+    paths["metadata"].write_text(json.dumps(metadata, indent=2, allow_nan=False)+"\n")
+    print(f"Saved {count} frames ({count/fps:.2f}s): {paths['behaviours']}")
     return metadata
 
 

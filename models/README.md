@@ -1,4 +1,18 @@
-# MediaPipe model assets
+# Tracking model assets
+
+The active video pipeline needs the MediaPipe **Pose** and **Hand** models below,
+the four OpenFace CE-CLM patch experts and bundled AU models, HMAD's model tables,
+and Grounding DINO Tiny. The MediaPipe Face model is optional for the retained
+standalone helper; it is not used for head/expression/gaze analysis in `main.py`.
+
+Native/model setup is documented in [README.md](../README.md). On this macOS
+arm64 workspace, `python build_native.py` builds OpenFace and downloads its patch
+experts; `python setup_tracking.py --download-hmad --download-object-model`
+downloads the pinned HMAD checkout and the object checkpoint. Models stay out of
+Git. Grounding DINO's cache is `models/hf-cache/`; OpenFace/HMAD assets are under
+their `external/` checkouts. Runs record the model revisions and available hashes.
+
+## MediaPipe bundles
 
 Official versioned model bundles downloaded from Google's model storage:
 
@@ -27,7 +41,7 @@ SHA-256 checksums:
 fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1  hand_landmarker.task
 ```
 
-Each extraction records checksums for the actual files used. Face extraction
-enables 478 landmarks, 52 blendshapes, and facial transformation matrices. Hand
+Each extraction records checksums for the actual files used. The optional
+standalone Face utility enables 478 landmarks, 52 blendshapes, and facial transformation matrices. Hand
 extraction enables up to two sets of 21 landmarks, world coordinates, and
 handedness classifications.

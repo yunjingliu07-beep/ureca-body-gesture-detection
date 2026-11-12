@@ -11,10 +11,9 @@
     "hand_motion_range": 0.12,
     "stationary_radius": 0.12,
     "walking_speed": 0.25,
-    "leg_deadband": 0.10,
+    "leg_deadband": 0.1,
     "leg_reversals": 2,
     "facing_tolerance_deg": 35,
-    "turn_face_offset": 0.10,
     "zone_dwell_s": 0.4,
     "crossing_display_s": 0.8,
     "approach_speed": 0.25,
@@ -25,9 +24,7 @@
     "standing_tilt_deg": 25
   },
   "face": {
-    "smile_threshold": 0.45,
-    "brow_raise_threshold": 0.35,
-    "brow_lower_threshold": 0.35
+    "confidence": 0.8
   },
   "scene": {
     "board_yaw_deg": 180,
@@ -35,5 +32,55 @@
     "zones": [],
     "groups": [],
     "desks": []
+  },
+  "head": {
+    "turn_yaw_deg": 15.0,
+    "cycle_excursion_deg": 8.0,
+    "cycle_return_deg": 4.0,
+    "reversal_deg": 2.0,
+    "cycle_min_s": 0.25,
+    "cycle_max_s": 2.0,
+    "yaw_sign": -1,
+    "pitch_up_sign": -1
+  },
+  "gaze": {
+    "horizontal_deg": 15.0,
+    "vertical_deg": 10.0,
+    "horizontal_sign": 1,
+    "vertical_sign": 1,
+    "reference_validated": false,
+    "reference_description": ""
+  },
+  "camera_motion": {
+    "window_s": 1.5,
+    "min_s": 1.0,
+    "max_gap_s": 0.25,
+    "depth_rate": 0.03,
+    "body_scale_rate": 0.02,
+    "orientation_change_deg": 10.0,
+    "background_zoom_log": 0.01,
+    "background_translation": 0.02,
+    "cut_difference": 0.28
+  },
+  "objects": {
+    "classes": [
+      "pen",
+      "pencil",
+      "marker",
+      "chalk",
+      "pointer",
+      "remote",
+      "book",
+      "paper",
+      "tablet"
+    ],
+    "detection_threshold": 0.35,
+    "text_threshold": 0.25,
+    "confirmation_s": 0.4,
+    "max_gap_s": 0.25,
+    "contact_palm_widths": 0.3,
+    "relative_motion_palm_widths": 0.65,
+    "hand_association_shoulder_widths": 0.5,
+    "min_palm_px": 8.0
   }
 }
