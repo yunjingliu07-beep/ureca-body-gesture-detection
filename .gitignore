@@ -1,5 +1,6 @@
 # Local data, generated results, and downloaded model weights.
 outputs/
+output/
 external/
 models/hf-cache/
 *.pt

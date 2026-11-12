@@ -1,4 +1,4 @@
-# Install in the isolated project environment; native OpenFace and R are separate.
+# Install in the ureca conda environment; native OpenFace and R are separate.
 -r requirements.txt
 torch==2.15.0
 torchvision==0.29.2

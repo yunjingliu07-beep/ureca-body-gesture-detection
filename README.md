@@ -21,7 +21,7 @@ A smile does not establish happiness; holding a marker does not establish writin
 Activate the project environment, then check tools and models:
 
 ```sh
-source .venv/bin/activate
+conda activate ureca
 python main.py --check-dependencies
 python main.py --output-dir outputs/my_first_tracking_run
 ```
@@ -77,14 +77,12 @@ because holding detection requires hand tracking.
 ## Setup
 
 Python body extraction was originally verified with Python 3.12 on macOS Apple
-Silicon. The additional Python packages live in this project's isolated `.venv`;
+Silicon. All Python packages live in the `ureca` conda environment;
 native dependencies live in `.runtime/`, and upstream sources in `external/`.
 These directories and downloaded model weights are excluded from Git.
 
 ```sh
 conda activate ureca
-python -m venv --system-site-packages .venv
-source .venv/bin/activate
 python -m pip install -r requirements-objects.txt
 
 # macOS arm64: build pinned OpenFace and install isolated R + matrixcalc.
