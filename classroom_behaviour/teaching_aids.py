@@ -13,8 +13,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from behaviour_common import TemporalGate
-from tracking_config import DEFAULT_AIDS, TeachingAidRules
+from .temporal import TemporalGate
+from .config import DEFAULT_AIDS, TeachingAidRules
 
 
 PROMPTS = {"pen": "a pen", "pencil": "a pencil", "marker": "a marker",
@@ -103,7 +103,7 @@ class GroundingDinoDetector:
             import transformers
             from transformers import AutoModelForZeroShotObjectDetection, AutoProcessor
         except ImportError as error:
-            raise RuntimeError("Teaching-aid detection needs requirements-objects.txt; see README.md") from error
+            raise RuntimeError("Teaching-aid detection needs requirements/objects.txt; see README.md") from error
         self.torch = torch
         source = self.model_name
         # Reuse a complete downloaded snapshot without HEAD requests on every run.
@@ -125,7 +125,7 @@ class GroundingDinoDetector:
                          "device": self.device, "torch_version": torch.__version__,
                          "transformers_version": transformers.__version__, "rules": asdict(self.rules)}
         if local and (Path(source) / "model.safetensors").is_file():
-            from native_tracking import sha256
+            from .native_tracking import sha256
             self.metadata["weights_sha256"] = sha256(Path(source) / "model.safetensors")
         return self
 

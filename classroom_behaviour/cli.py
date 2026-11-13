@@ -5,9 +5,9 @@ and writes a translucent person mask with skeleton, face, gaze and held objects.
 Confirmed behaviours appear in the upper-right corner. Frame, event and window
 CSVs and metadata JSON preserve measurements and gesture durations for review.
 
-Default: python main.py (first 30 seconds of the Calculus 1 Lecture 0.1 video).
+Default: python -m classroom_behaviour (first 30 seconds of the Calculus 1 Lecture 0.1 video).
 Teaching-aid detection is off by default; select --teaching-aids on to enable it.
-Scene-dependent rules: add --config classroom_config.example.json after editing
+Scene-dependent rules: add --config configs/classroom.example.json after editing
 its example coordinates and orientation angles for your own fixed camera.
 """
 
@@ -27,21 +27,19 @@ os.environ.setdefault("MPLCONFIGDIR", "/tmp/ureca-matplotlib")
 import cv2
 import numpy as np
 
-from behaviour_common import TemporalGate
-from body_gestures import BODY_LABELS, DEFAULT_SCENE, BodyGestureExtractor, BodyRules, validate_scene
-from facial_expressions import FACE_LABELS, DIRECT_LABELS, FacialExpressionExtractor, build_face_timeline
-from tracking_config import (FaceRules, HeadRules, GazeRules, CameraMovementRules,
+from .temporal import TemporalGate
+from .body_gestures import BODY_LABELS, DEFAULT_SCENE, BodyGestureExtractor, BodyRules, validate_scene
+from .facial_expressions import FACE_LABELS, DIRECT_LABELS, FacialExpressionExtractor, build_face_timeline
+from .config import (FaceRules, HeadRules, GazeRules, CameraMovementRules,
                              TeachingAidRules, TrackingRules)
-from camera_movement import CAMERA_LABELS, CameraGuard, CameraMovementDetector
-from native_tracking import prepare_native, resolve_executable, sha256
-from teaching_aids import OBJECT_LABELS, GroundingDinoDetector, TeachingAidTracker
-from window_summary import write_window_summary
+from .camera_movement import CAMERA_LABELS, CameraGuard, CameraMovementDetector
+from .native_tracking import prepare_native, resolve_executable, sha256
+from .teaching_aids import OBJECT_LABELS, GroundingDinoDetector, TeachingAidTracker
+from .window_summary import write_window_summary
 
 
-PROJECT_DIR = Path(__file__).resolve().parent
-DEFAULT_INPUT = PROJECT_DIR / (
-    "Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag].webm"
-)
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_INPUT = PROJECT_DIR / "data/videos/calculus_lecture.webm"
 
 
 def load_settings(path=None):
@@ -184,7 +182,7 @@ class EventWriter:
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
-    parser.add_argument("--output-dir", type=Path, default=PROJECT_DIR / "outputs/behaviours")
+    parser.add_argument("--output-dir", type=Path, default=PROJECT_DIR / "outputs/runs/behaviours")
     parser.add_argument("--config", type=Path)
     duration = parser.add_mutually_exclusive_group()
     duration.add_argument("--seconds", type=float, default=30, help="First N seconds; default: 30")
@@ -281,11 +279,11 @@ def main(argv=None):
             if not args.hmad_results:
                 resolve_executable(args.rscript, "Rscript")
                 if not (args.hmad_dir / "sourceR").is_dir():
-                    raise ValueError("HMAD is missing; run setup_tracking.py --download-hmad")
+                    raise ValueError("HMAD is missing; run python -m scripts.setup_models --download-hmad")
         if objects_enabled:
             import importlib.util
             if any(importlib.util.find_spec(name) is None for name in ("torch", "transformers")):
-                raise ValueError("Object detection dependencies missing; install requirements-objects.txt")
+                raise ValueError("Object detection dependencies missing; install requirements/objects.txt")
     except (ValueError, OSError, TypeError) as error:
         parser.error(str(error))
     models = {"pose": args.pose_model}

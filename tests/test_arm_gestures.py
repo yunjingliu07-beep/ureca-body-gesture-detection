@@ -4,7 +4,7 @@ import unittest
 
 import numpy as np
 
-from body_gestures import classify_frame, direction
+from classroom_behaviour.body_gestures import classify_frame, direction
 
 
 def body():

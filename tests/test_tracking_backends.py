@@ -14,13 +14,13 @@ from unittest.mock import patch
 import cv2
 import numpy as np
 
-from camera_movement import CameraGuard, CameraMovementDetector
-from facial_expressions import (AU_NUMBERS, CycleDetector, FacialExpressionExtractor, HMADTables,
+from classroom_behaviour.camera_movement import CameraGuard, CameraMovementDetector
+from classroom_behaviour.facial_expressions import (AU_NUMBERS, CycleDetector, FacialExpressionExtractor, HMADTables,
                                 IntervalTable, build_face_timeline, classify_observation)
-from main import main
-from native_tracking import sha256, validate_openface_csv
-from tracking_config import GazeRules, TrackingRules
-from teaching_aids import TeachingAidTracker, TeachingAidRules
+from classroom_behaviour.cli import main
+from classroom_behaviour.native_tracking import sha256, validate_openface_csv
+from classroom_behaviour.config import GazeRules, TrackingRules
+from classroom_behaviour.teaching_aids import TeachingAidTracker, TeachingAidRules
 
 
 def observation(t=0, **overrides):
@@ -167,7 +167,7 @@ class TrackingTests(unittest.TestCase):
         self.assertTrue(guard.update(np.full_like(image,255),.04)['camera_cut'])
 
     def test_imported_native_exports_merge_into_real_video_outputs(self):
-        from body_gestures import BODY_LABELS
+        from classroom_behaviour.body_gestures import BODY_LABELS
         class FakeBody:
             def __init__(self,*a,**k):self.points={};self.hand_observations={}
             def __enter__(self):return self
@@ -191,8 +191,8 @@ class TrackingTests(unittest.TestCase):
             find_spec=importlib.util.find_spec
             for index,flags in enumerate(([],['--teaching-aids','off'],['--teaching-aids','on'])):
                 enabled=flags==['--teaching-aids','on']
-                with self.subTest(flags=flags), patch('main.BodyGestureExtractor',FakeBody), \
-                     patch('main.GroundingDinoDetector',return_value=FakeDetector()) as detector, \
+                with self.subTest(flags=flags), patch('classroom_behaviour.cli.BodyGestureExtractor',FakeBody), \
+                     patch('classroom_behaviour.cli.GroundingDinoDetector',return_value=FakeDetector()) as detector, \
                      patch('importlib.util.find_spec',side_effect=lambda name: (object() if enabled else None) if name in ('torch','transformers') else find_spec(name)):
                     duration_flags=['--seconds','.3'] if index==2 else ['--full-video']
                     window_flags=['--window-seconds','.1'] if index else []

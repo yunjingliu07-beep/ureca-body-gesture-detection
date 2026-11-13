@@ -4,10 +4,10 @@ import math
 import unittest
 import numpy as np
 
-from behaviour_common import TemporalGate
-from body_gestures import BodyGestureDetector
-from facial_expressions import classify_observation
-from main import load_settings
+from classroom_behaviour.temporal import TemporalGate
+from classroom_behaviour.body_gestures import BodyGestureDetector
+from classroom_behaviour.facial_expressions import classify_observation
+from classroom_behaviour.cli import load_settings
 
 
 def speaker(face_x=.5, yaw=0):

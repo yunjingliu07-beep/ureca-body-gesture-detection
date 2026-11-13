@@ -10,11 +10,11 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from behaviour_common import TemporalGate
-from body_gestures import (BodyGestureDetector, BodyRules, draw_skeleton,
+from classroom_behaviour.temporal import TemporalGate
+from classroom_behaviour.body_gestures import (BodyGestureDetector, BodyRules, draw_skeleton,
                            polygon_distance, torso_yaw, validate_scene, visible_points)
-from facial_expressions import classify_expressions
-from main import DEFAULT_INPUT, PROJECT_DIR, EventWriter, build_parser, load_settings, main, render_mask
+from classroom_behaviour.facial_expressions import classify_expressions
+from classroom_behaviour.cli import DEFAULT_INPUT, PROJECT_DIR, EventWriter, build_parser, load_settings, main, render_mask
 
 
 def body(x=0.5, leg=0.04, yaw=0):
@@ -43,12 +43,12 @@ class BehaviourTests(unittest.TestCase):
         parser = build_parser()
         args = parser.parse_args([])
         self.assertEqual(args.input, DEFAULT_INPUT)
-        self.assertTrue(args.input.name.startswith("Calculus 1 Lecture 0.1"))
+        self.assertEqual(args.input.name, "calculus_lecture.webm")
         self.assertEqual(args.input.suffix, ".webm")
-        self.assertEqual(args.input.parent, PROJECT_DIR)
+        self.assertEqual(args.input.parent, PROJECT_DIR / "data/videos")
         self.assertEqual(args.seconds, 30)
         self.assertEqual(args.pose_model.parent, PROJECT_DIR / "models")
-        self.assertEqual(args.output_dir, PROJECT_DIR / "outputs/behaviours")
+        self.assertEqual(args.output_dir, PROJECT_DIR / "outputs/runs/behaviours")
         self.assertIsNone(parser.parse_args(["--full-video"]).seconds)
         args = parser.parse_args(["--input", "other.mp4", "--seconds", "10"])
         self.assertEqual(args.input, Path("other.mp4"))
@@ -189,7 +189,7 @@ class BehaviourTests(unittest.TestCase):
         np.testing.assert_array_equal(output[16:], frame[16:])
         self.assertFalse(np.array_equal(output[:16], frame[:16]))
         self.assertFalse(render_mask(frame, None, "mask").any())
-        load_settings(Path(__file__).resolve().parents[1] / "classroom_config.example.json")
+        load_settings(Path(__file__).resolve().parents[1] / "configs/classroom.example.json")
         with self.assertRaises(ValueError):
             validate_scene({"zones": [region("bad", -1, 0.5)]})
         with self.assertRaises(ValueError):

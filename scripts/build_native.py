@@ -11,9 +11,9 @@ import shlex
 import shutil
 import subprocess
 
-from native_tracking import run_logged
+from classroom_behaviour.native_tracking import run_logged
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 OPENFACE_REVISION = '3d4b5cf8d96138be42bed229447f36cbb09a5a29'
 DLIB_REVISION = '39749fba5163d4e25030358f6aa8d91617bfdca2'
 
@@ -46,7 +46,7 @@ def main():
     conda=shutil.which('conda')
     if not conda:
         raise RuntimeError('Miniconda/Miniforge is required for isolated native dependencies')
-    (ROOT/'outputs').mkdir(exist_ok=True)
+    (ROOT/'logs/build').mkdir(parents=True, exist_ok=True)
     environment={**os.environ,'CONDA_PKGS_DIRS':str(ROOT/'.runtime/conda-pkgs')}
     for name,packages in [('r',['r-base=4.4','r-matrixcalc']),('openface',['cmake=3.31','libopencv=4.10','tbb-devel','openblas','boost-cpp'])]:
         prefix=ROOT/'.runtime'/name
@@ -63,17 +63,17 @@ def main():
     prefix=ROOT/'.runtime/openface';cmake=prefix/'bin/cmake'
     run_logged([cmake,'-S',dlib/'dlib','-B',ROOT/'external/dlib-build','-D','CMAKE_BUILD_TYPE=Release',
                 '-D',f'CMAKE_INSTALL_PREFIX={prefix}','-D','DLIB_NO_GUI_SUPPORT=ON','-D','DLIB_USE_CUDA=OFF',
-                '-D','DLIB_USE_BLAS=OFF','-D','DLIB_USE_LAPACK=OFF','-D','CMAKE_OSX_ARCHITECTURES=arm64'],ROOT/'outputs/dlib_configure.log')
-    run_logged([cmake,'--build',ROOT/'external/dlib-build','--parallel','4'],ROOT/'outputs/dlib_build.log')
-    run_logged([cmake,'--install',ROOT/'external/dlib-build'],ROOT/'outputs/dlib_install.log')
-    from setup_tracking import download_openface_models
+                '-D','DLIB_USE_BLAS=OFF','-D','DLIB_USE_LAPACK=OFF','-D','CMAKE_OSX_ARCHITECTURES=arm64'],ROOT/'logs/build/dlib_configure.log')
+    run_logged([cmake,'--build',ROOT/'external/dlib-build','--parallel','4'],ROOT/'logs/build/dlib_build.log')
+    run_logged([cmake,'--install',ROOT/'external/dlib-build'],ROOT/'logs/build/dlib_install.log')
+    from scripts.setup_models import download_openface_models
     download_openface_models(ROOT/'external/OpenFace')
     build=ROOT/'external/OpenFace/build'
     run_logged([cmake,'-S',ROOT/'external/OpenFace','-B',build,'-D','CMAKE_BUILD_TYPE=Release',
                 '-D',f'CMAKE_PREFIX_PATH={prefix}','-D',f'OpenBLAS_LIB={prefix}/lib/libopenblas.dylib',
-                '-D',f'OpenBLAS_INCLUDE_DIR={prefix}/include','-D','CMAKE_OSX_ARCHITECTURES=arm64'],ROOT/'outputs/openface_configure.log')
-    run_logged([cmake,'--build',build,'--target','FeatureExtraction','--parallel','4'],ROOT/'outputs/openface_build.log')
-    print('Native tools ready. Run python setup_tracking.py --download-hmad, then python main.py --check-dependencies.')
+                '-D',f'OpenBLAS_INCLUDE_DIR={prefix}/include','-D','CMAKE_OSX_ARCHITECTURES=arm64'],ROOT/'logs/build/openface_configure.log')
+    run_logged([cmake,'--build',build,'--target','FeatureExtraction','--parallel','4'],ROOT/'logs/build/openface_build.log')
+    print('Native tools ready. Run python -m scripts.setup_models --download-hmad, then python -m classroom_behaviour --check-dependencies.')
 
 
 if __name__=='__main__':

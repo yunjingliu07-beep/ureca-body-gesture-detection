@@ -1,0 +1,1648 @@
+{
+  "date": "2026-11-13",
+  "moves": [
+    {
+      "old": "main.py",
+      "new": "classroom_behaviour/cli.py",
+      "original": "main.py"
+    },
+    {
+      "old": "behaviour_common.py",
+      "new": "classroom_behaviour/temporal.py",
+      "original": "behaviour_common.py"
+    },
+    {
+      "old": "tracking_config.py",
+      "new": "classroom_behaviour/config.py",
+      "original": "tracking_config.py"
+    },
+    {
+      "old": "face_hand_landmarks.py",
+      "new": "classroom_behaviour/landmarks.py",
+      "original": "face_hand_landmarks.py"
+    },
+    {
+      "old": "body_gestures.py",
+      "new": "classroom_behaviour/body_gestures.py",
+      "original": "body_gestures.py"
+    },
+    {
+      "old": "camera_movement.py",
+      "new": "classroom_behaviour/camera_movement.py",
+      "original": "camera_movement.py"
+    },
+    {
+      "old": "facial_expressions.py",
+      "new": "classroom_behaviour/facial_expressions.py",
+      "original": "facial_expressions.py"
+    },
+    {
+      "old": "native_tracking.py",
+      "new": "classroom_behaviour/native_tracking.py",
+      "original": "native_tracking.py"
+    },
+    {
+      "old": "teaching_aids.py",
+      "new": "classroom_behaviour/teaching_aids.py",
+      "original": "teaching_aids.py"
+    },
+    {
+      "old": "window_summary.py",
+      "new": "classroom_behaviour/window_summary.py",
+      "original": "window_summary.py"
+    },
+    {
+      "old": "hmad_bridge.R",
+      "new": "classroom_behaviour/hmad_bridge.R",
+      "original": "hmad_bridge.R"
+    },
+    {
+      "old": "build_native.py",
+      "new": "scripts/build_native.py",
+      "original": "build_native.py"
+    },
+    {
+      "old": "setup_tracking.py",
+      "new": "scripts/setup_models.py",
+      "original": "setup_tracking.py"
+    },
+    {
+      "old": "BEHAVIOUR_RULES.md",
+      "new": "docs/behaviour_rules.md",
+      "original": "BEHAVIOUR_RULES.md"
+    },
+    {
+      "old": "THIRD_PARTY.md",
+      "new": "docs/third_party.md",
+      "original": "THIRD_PARTY.md"
+    },
+    {
+      "old": "classroom_config.example.json",
+      "new": "configs/classroom.example.json",
+      "original": "classroom_config.example.json"
+    },
+    {
+      "old": "requirements-objects.txt",
+      "new": "requirements/objects.txt",
+      "original": "requirements-objects.txt"
+    },
+    {
+      "old": "Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag].webm",
+      "new": "data/videos/calculus_lecture.webm",
+      "original": "Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag].webm"
+    },
+    {
+      "old": "Macroeconomics- Everything You Need to Know [MKO1icFVtDc].webm",
+      "new": "data/videos/macroeconomics_lecture.webm",
+      "original": "Macroeconomics- Everything You Need to Know [MKO1icFVtDc].webm"
+    },
+    {
+      "old": "output/calculus_lecture",
+      "new": "outputs/runs/calculus_lecture",
+      "original": "output/calculus_lecture"
+    },
+    {
+      "old": "output/macroeconomics_lecture",
+      "new": "outputs/runs/macroeconomics_lecture",
+      "original": "output/macroeconomics_lecture"
+    },
+    {
+      "old": "outputs/all_tracking_3s",
+      "new": "outputs/validation/all_tracking_3s",
+      "original": "outputs/all_tracking_3s"
+    },
+    {
+      "old": "outputs/calculus_2min_test",
+      "new": "outputs/validation/calculus_2min_test",
+      "original": "outputs/calculus_2min_test"
+    },
+    {
+      "old": "outputs/native_current_verified",
+      "new": "outputs/validation/native_current_verified",
+      "original": "outputs/native_current_verified"
+    },
+    {
+      "old": "outputs/object_model_smoke",
+      "new": "outputs/validation/object_model_smoke",
+      "original": "outputs/object_model_smoke"
+    },
+    {
+      "old": "outputs/openface_hmad_30s_final",
+      "new": "outputs/validation/openface_hmad_30s_final",
+      "original": "outputs/openface_hmad_30s_final"
+    },
+    {
+      "old": "outputs/calculus_30s_test",
+      "new": "outputs/archive/calculus_30s_test",
+      "original": "outputs/calculus_30s_test"
+    },
+    {
+      "old": "outputs/hmad_bridge_latest_results",
+      "new": "outputs/archive/hmad_bridge_latest_results",
+      "original": "outputs/hmad_bridge_latest_results"
+    },
+    {
+      "old": "outputs/native_latest_check",
+      "new": "outputs/archive/native_latest_check",
+      "original": "outputs/native_latest_check"
+    },
+    {
+      "old": "outputs/openface_hmad_30s",
+      "new": "outputs/archive/openface_hmad_30s",
+      "original": "outputs/openface_hmad_30s"
+    },
+    {
+      "old": "outputs/openface_hmad_30s_v2",
+      "new": "outputs/archive/openface_hmad_30s_v2",
+      "original": "outputs/openface_hmad_30s_v2"
+    },
+    {
+      "old": "outputs/openface_hmad_30s_verified",
+      "new": "outputs/archive/openface_hmad_30s_verified",
+      "original": "outputs/openface_hmad_30s_verified"
+    },
+    {
+      "old": "outputs/calculus_2min_bodyface_run.log",
+      "new": "logs/archive/calculus_2min_bodyface_run.log",
+      "original": "outputs/calculus_2min_bodyface_run.log"
+    },
+    {
+      "old": "outputs/calculus_2min_test_run.log",
+      "new": "logs/archive/calculus_2min_test_run.log",
+      "original": "outputs/calculus_2min_test_run.log"
+    },
+    {
+      "old": "outputs/debug_bagmad.log",
+      "new": "logs/archive/debug_bagmad.log",
+      "original": "outputs/debug_bagmad.log"
+    },
+    {
+      "old": "outputs/dlib_build.log",
+      "new": "logs/build/dlib_build.log",
+      "original": "outputs/dlib_build.log"
+    },
+    {
+      "old": "outputs/dlib_install.log",
+      "new": "logs/build/dlib_install.log",
+      "original": "outputs/dlib_install.log"
+    },
+    {
+      "old": "outputs/hmad_bridge_latest.log",
+      "new": "logs/archive/hmad_bridge_latest.log",
+      "original": "outputs/hmad_bridge_latest.log"
+    },
+    {
+      "old": "outputs/hmad_bridge_retry.log",
+      "new": "logs/archive/hmad_bridge_retry.log",
+      "original": "outputs/hmad_bridge_retry.log"
+    },
+    {
+      "old": "outputs/openface_build.log",
+      "new": "logs/build/openface_build.log",
+      "original": "outputs/openface_build.log"
+    },
+    {
+      "old": "outputs/openface_configure.log",
+      "new": "logs/build/openface_configure.log",
+      "original": "outputs/openface_configure.log"
+    },
+    {
+      "old": "outputs/debug_bagmad.R",
+      "new": "scripts/diagnostics/debug_bagmad.R",
+      "original": "outputs/debug_bagmad.R"
+    },
+    {
+      "old": ".runtime/run-logs",
+      "new": "logs/runs",
+      "original": ".runtime/run-logs"
+    },
+    {
+      "old": ".runtime/python-env-migration",
+      "new": "logs/environment_migration",
+      "original": ".runtime/python-env-migration"
+    },
+    {
+      "old": "outputs/validation/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_frames.csv",
+      "new": "outputs/validation/calculus_2min_test/calculus_lecture_frames.csv",
+      "original": "outputs/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_frames.csv"
+    },
+    {
+      "old": "outputs/validation/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_preview.jpg",
+      "new": "outputs/validation/calculus_2min_test/calculus_lecture_preview.jpg",
+      "original": "outputs/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_preview.jpg"
+    },
+    {
+      "old": "outputs/validation/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_windows.csv",
+      "new": "outputs/validation/calculus_2min_test/calculus_lecture_windows.csv",
+      "original": "outputs/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_windows.csv"
+    },
+    {
+      "old": "outputs/validation/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_metadata.json",
+      "new": "outputs/validation/calculus_2min_test/calculus_lecture_metadata.json",
+      "original": "outputs/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_metadata.json"
+    },
+    {
+      "old": "outputs/validation/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4",
+      "new": "outputs/validation/calculus_2min_test/calculus_lecture_behaviours.mp4",
+      "original": "outputs/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4"
+    },
+    {
+      "old": "outputs/validation/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_events.csv",
+      "new": "outputs/validation/calculus_2min_test/calculus_lecture_events.csv",
+      "original": "outputs/calculus_2min_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_events.csv"
+    },
+    {
+      "old": "outputs/validation/openface_hmad_30s_final/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_frames.csv",
+      "new": "outputs/validation/openface_hmad_30s_final/calculus_lecture_frames.csv",
+      "original": "outputs/openface_hmad_30s_final/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_frames.csv"
+    },
+    {
+      "old": "outputs/validation/openface_hmad_30s_final/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_preview.jpg",
+      "new": "outputs/validation/openface_hmad_30s_final/calculus_lecture_preview.jpg",
+      "original": "outputs/openface_hmad_30s_final/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_preview.jpg"
+    },
+    {
+      "old": "outputs/validation/openface_hmad_30s_final/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_metadata.json",
+      "new": "outputs/validation/openface_hmad_30s_final/calculus_lecture_metadata.json",
+      "original": "outputs/openface_hmad_30s_final/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_metadata.json"
+    },
+    {
+      "old": "outputs/validation/openface_hmad_30s_final/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4",
+      "new": "outputs/validation/openface_hmad_30s_final/calculus_lecture_behaviours.mp4",
+      "original": "outputs/openface_hmad_30s_final/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4"
+    },
+    {
+      "old": "outputs/validation/openface_hmad_30s_final/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_events.csv",
+      "new": "outputs/validation/openface_hmad_30s_final/calculus_lecture_events.csv",
+      "original": "outputs/openface_hmad_30s_final/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_events.csv"
+    },
+    {
+      "old": "outputs/validation/all_tracking_3s/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_frames.csv",
+      "new": "outputs/validation/all_tracking_3s/calculus_lecture_frames.csv",
+      "original": "outputs/all_tracking_3s/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_frames.csv"
+    },
+    {
+      "old": "outputs/validation/all_tracking_3s/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_preview.jpg",
+      "new": "outputs/validation/all_tracking_3s/calculus_lecture_preview.jpg",
+      "original": "outputs/all_tracking_3s/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_preview.jpg"
+    },
+    {
+      "old": "outputs/validation/all_tracking_3s/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_metadata.json",
+      "new": "outputs/validation/all_tracking_3s/calculus_lecture_metadata.json",
+      "original": "outputs/all_tracking_3s/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_metadata.json"
+    },
+    {
+      "old": "outputs/validation/all_tracking_3s/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4",
+      "new": "outputs/validation/all_tracking_3s/calculus_lecture_behaviours.mp4",
+      "original": "outputs/all_tracking_3s/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4"
+    },
+    {
+      "old": "outputs/validation/all_tracking_3s/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_events.csv",
+      "new": "outputs/validation/all_tracking_3s/calculus_lecture_events.csv",
+      "original": "outputs/all_tracking_3s/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_events.csv"
+    },
+    {
+      "old": "outputs/runs/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_windows.csv",
+      "new": "outputs/runs/macroeconomics_lecture/macroeconomics_lecture_windows.csv",
+      "original": "output/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_windows.csv"
+    },
+    {
+      "old": "outputs/runs/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_preview.jpg",
+      "new": "outputs/runs/macroeconomics_lecture/macroeconomics_lecture_preview.jpg",
+      "original": "output/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_preview.jpg"
+    },
+    {
+      "old": "outputs/runs/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_behaviours.mp4",
+      "new": "outputs/runs/macroeconomics_lecture/macroeconomics_lecture_behaviours.mp4",
+      "original": "output/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_behaviours.mp4"
+    },
+    {
+      "old": "outputs/runs/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_events.csv",
+      "new": "outputs/runs/macroeconomics_lecture/macroeconomics_lecture_events.csv",
+      "original": "output/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_events.csv"
+    },
+    {
+      "old": "outputs/runs/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_metadata.json",
+      "new": "outputs/runs/macroeconomics_lecture/macroeconomics_lecture_metadata.json",
+      "original": "output/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_metadata.json"
+    },
+    {
+      "old": "outputs/runs/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_frames.csv",
+      "new": "outputs/runs/macroeconomics_lecture/macroeconomics_lecture_frames.csv",
+      "original": "output/macroeconomics_lecture/Macroeconomics- Everything You Need to Know [MKO1icFVtDc]_frames.csv"
+    },
+    {
+      "old": "outputs/runs/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_frames.csv",
+      "new": "outputs/runs/calculus_lecture/calculus_lecture_frames.csv",
+      "original": "output/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_frames.csv"
+    },
+    {
+      "old": "outputs/runs/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_preview.jpg",
+      "new": "outputs/runs/calculus_lecture/calculus_lecture_preview.jpg",
+      "original": "output/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_preview.jpg"
+    },
+    {
+      "old": "outputs/runs/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_windows.csv",
+      "new": "outputs/runs/calculus_lecture/calculus_lecture_windows.csv",
+      "original": "output/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_windows.csv"
+    },
+    {
+      "old": "outputs/runs/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_metadata.json",
+      "new": "outputs/runs/calculus_lecture/calculus_lecture_metadata.json",
+      "original": "output/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_metadata.json"
+    },
+    {
+      "old": "outputs/runs/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4",
+      "new": "outputs/runs/calculus_lecture/calculus_lecture_behaviours.mp4",
+      "original": "output/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4"
+    },
+    {
+      "old": "outputs/runs/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_events.csv",
+      "new": "outputs/runs/calculus_lecture/calculus_lecture_events.csv",
+      "original": "output/calculus_lecture/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_events.csv"
+    },
+    {
+      "old": "outputs/archive/openface_hmad_30s_v2/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4",
+      "new": "outputs/archive/openface_hmad_30s_v2/calculus_lecture_behaviours.mp4",
+      "original": "outputs/openface_hmad_30s_v2/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4"
+    },
+    {
+      "old": "outputs/archive/calculus_30s_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_frames.csv",
+      "new": "outputs/archive/calculus_30s_test/calculus_lecture_frames.csv",
+      "original": "outputs/calculus_30s_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_frames.csv"
+    },
+    {
+      "old": "outputs/archive/calculus_30s_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_preview.jpg",
+      "new": "outputs/archive/calculus_30s_test/calculus_lecture_preview.jpg",
+      "original": "outputs/calculus_30s_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_preview.jpg"
+    },
+    {
+      "old": "outputs/archive/calculus_30s_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_metadata.json",
+      "new": "outputs/archive/calculus_30s_test/calculus_lecture_metadata.json",
+      "original": "outputs/calculus_30s_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_metadata.json"
+    },
+    {
+      "old": "outputs/archive/calculus_30s_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4",
+      "new": "outputs/archive/calculus_30s_test/calculus_lecture_behaviours.mp4",
+      "original": "outputs/calculus_30s_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_behaviours.mp4"
+    },
+    {
+      "old": "outputs/archive/calculus_30s_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_events.csv",
+      "new": "outputs/archive/calculus_30s_test/calculus_lecture_events.csv",
+      "original": "outputs/calculus_30s_test/Calculus 1 Lecture 0.1：  Lines, Angle of Inclination, and the Distance Formula [fYyARMqiaag]_events.csv"
+    },
+    {
+      "old": "tests/test_face_hand_landmarks.py",
+      "new": "tests/test_landmarks.py",
+      "original": "tests/test_face_hand_landmarks.py"
+    }
+  ],
+  "updated_records": [
+    "logs/runs/verification.json",
+    "outputs/.calculus_2min_test_run_state.json",
+    "outputs/archive/calculus_30s_test/calculus_lecture_metadata.json",
+    "outputs/archive/native_latest_check/hmad_results/manifest.json",
+    "outputs/archive/native_latest_check/hmad_workspace/projects/URECA/media_path.txt",
+    "outputs/archive/native_latest_check/manifest.json",
+    "outputs/archive/openface_hmad_30s/native/hmad_results/manifest.json",
+    "outputs/archive/openface_hmad_30s/native/manifest.json",
+    "outputs/archive/openface_hmad_30s_v2/native/hmad_results/manifest.json",
+    "outputs/archive/openface_hmad_30s_v2/native/hmad_workspace/projects/URECA/OPENFACE/bagmad/result/bagmad.eaf",
+    "outputs/archive/openface_hmad_30s_v2/native/manifest.json",
+    "outputs/runs/calculus_lecture/calculus_lecture_metadata.json",
+    "outputs/runs/calculus_lecture/native/hmad_results/manifest.json",
+    "outputs/runs/calculus_lecture/native/hmad_workspace/projects/URECA/OPENFACE/bagmad/result/bagmad.eaf",
+    "outputs/runs/calculus_lecture/native/hmad_workspace/projects/URECA/media_path.txt",
+    "outputs/runs/calculus_lecture/native/manifest.json",
+    "outputs/runs/macroeconomics_lecture/macroeconomics_lecture_metadata.json",
+    "outputs/runs/macroeconomics_lecture/native/hmad_results/manifest.json",
+    "outputs/runs/macroeconomics_lecture/native/hmad_workspace/projects/URECA/OPENFACE/bagmad/result/bagmad.eaf",
+    "outputs/runs/macroeconomics_lecture/native/hmad_workspace/projects/URECA/media_path.txt",
+    "outputs/runs/macroeconomics_lecture/native/manifest.json",
+    "outputs/validation/all_tracking_3s/calculus_lecture_metadata.json",
+    "outputs/validation/all_tracking_3s/native/hmad_results/manifest.json",
+    "outputs/validation/all_tracking_3s/native/manifest.json",
+    "outputs/validation/calculus_2min_test/calculus_lecture_metadata.json",
+    "outputs/validation/calculus_2min_test/native/hmad_results/manifest.json",
+    "outputs/validation/calculus_2min_test/native/manifest.json",
+    "outputs/validation/calculus_2min_test/verification.json",
+    "outputs/validation/native_current_verified/hmad_results/manifest.json",
+    "outputs/validation/native_current_verified/hmad_workspace/projects/URECA/OPENFACE/bagmad/result/bagmad.eaf",
+    "outputs/validation/native_current_verified/hmad_workspace/projects/URECA/media_path.txt",
+    "outputs/validation/native_current_verified/manifest.json",
+    "outputs/validation/openface_hmad_30s_final/calculus_lecture_metadata.json",
+    "outputs/validation/openface_hmad_30s_final/native/hmad_results/manifest.json",
+    "outputs/validation/openface_hmad_30s_final/native/manifest.json"
+  ],
+  "deduplicated": [
+    {
+      "path": "outputs/runs/macroeconomics_lecture/native/hmad_workspace/projects/URECA/analysis.avi",
+      "target": "outputs/runs/macroeconomics_lecture/native/analysis.avi",
+      "bytes": 597278680
+    },
+    {
+      "path": "outputs/runs/macroeconomics_lecture/native/hmad_workspace/projects/URECA/OPENFACE/processed/URECA_ofo.csv",
+      "target": "outputs/runs/macroeconomics_lecture/native/processed/analysis.csv",
+      "bytes": 13653611
+    },
+    {
+      "path": "outputs/runs/calculus_lecture/native/hmad_workspace/projects/URECA/analysis.avi",
+      "target": "outputs/runs/calculus_lecture/native/analysis.avi",
+      "bytes": 184012582
+    },
+    {
+      "path": "outputs/runs/calculus_lecture/native/hmad_workspace/projects/URECA/OPENFACE/processed/URECA_ofo.csv",
+      "target": "outputs/runs/calculus_lecture/native/processed/analysis.csv",
+      "bytes": 13648710
+    },
+    {
+      "path": "outputs/archive/openface_hmad_30s_v2/native/hmad_workspace/projects/URECA/OPENFACE/processed/URECA_ofo.csv",
+      "target": "outputs/archive/openface_hmad_30s_v2/native/openface.csv",
+      "bytes": 3415889
+    },
+    {
+      "path": "outputs/archive/openface_hmad_30s/native/hmad_workspace/projects/URECA/analysis.avi",
+      "target": "outputs/archive/openface_hmad_30s/native/analysis.avi",
+      "bytes": 47039404
+    },
+    {
+      "path": "outputs/archive/openface_hmad_30s/native/hmad_workspace/projects/URECA/OPENFACE/processed/URECA_ofo.csv",
+      "target": "outputs/archive/openface_hmad_30s/native/processed/analysis.csv",
+      "bytes": 3415889
+    }
+  ],
+  "removed": [
+    {
+      "path": ".runtime/conda-pkgs/sdl2-2.32.56-ha89b795_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 546361
+    },
+    {
+      "path": ".runtime/conda-pkgs/libsqlite-3.53.4-h34a968b_102.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 939016
+    },
+    {
+      "path": ".runtime/conda-pkgs/libwebp-base-1.6.0-h202fb40_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 294522
+    },
+    {
+      "path": ".runtime/conda-pkgs/libgfortran5-16.2.0-hdb7a957_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 554793
+    },
+    {
+      "path": ".runtime/conda-pkgs/font-ttf-inconsolata-3.000-h77eed37_0.tar.bz2",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 96530
+    },
+    {
+      "path": ".runtime/conda-pkgs/r-base-4.4.3-h53b2b52_12.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 27636393
+    },
+    {
+      "path": ".runtime/conda-pkgs/libcblas-3.11.0-12_hb0561ab_openblas.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 18222
+    },
+    {
+      "path": ".runtime/conda-pkgs/rhash-1.4.6-h84a0fba_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 185483
+    },
+    {
+      "path": ".runtime/conda-pkgs/libaec-1.1.8-he95cea4_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 31642
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-hetero-plugin-2024.6.0-hd3d436d_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 178488
+    },
+    {
+      "path": ".runtime/conda-pkgs/compiler-rt-23.1.4-hce30654_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 16484
+    },
+    {
+      "path": ".runtime/conda-pkgs/pugixml-1.14-h13dd4ca_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 92472
+    },
+    {
+      "path": ".runtime/conda-pkgs/libabseil-20240722.0-cxx17_h07bc746_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1178260
+    },
+    {
+      "path": ".runtime/conda-pkgs/tbb-2022.3.0-h66ce52b_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 121436
+    },
+    {
+      "path": ".runtime/conda-pkgs/zstd-1.5.7-hf451053_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 433687
+    },
+    {
+      "path": ".runtime/conda-pkgs/liblzma-5.8.3-h8088a28_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 91720
+    },
+    {
+      "path": ".runtime/conda-pkgs/sdl3-3.4.20-h8ebb890_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1581860
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-arm-cpu-plugin-2024.6.0-h97facdf_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 7525786
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-auto-plugin-2024.6.0-h7f72211_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 212834
+    },
+    {
+      "path": ".runtime/conda-pkgs/gcc_impl_osx-arm64-16.2.0-hff32234_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 51016903
+    },
+    {
+      "path": ".runtime/conda-pkgs/cairo-1.18.4-h6a3b0d2_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 896173
+    },
+    {
+      "path": ".runtime/conda-pkgs/libuv-1.52.1-h1a92334_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 122729
+    },
+    {
+      "path": ".runtime/conda-pkgs/curl-8.23.0-h6651222_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 183387
+    },
+    {
+      "path": ".runtime/conda-pkgs/libpsl-0.23.1-hdb0c161_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 72673
+    },
+    {
+      "path": ".runtime/conda-pkgs/ld64_osx-arm64-956.6-llvm23_1_hc8058f9_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 984450
+    },
+    {
+      "path": ".runtime/conda-pkgs/libssh2-1.11.1-hbf2880b_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 280492
+    },
+    {
+      "path": ".runtime/conda-pkgs/libintl-0.25.1-hae62183_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 90024
+    },
+    {
+      "path": ".runtime/conda-pkgs/fonts-conda-ecosystem-1-0.tar.bz2",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 3667
+    },
+    {
+      "path": ".runtime/conda-pkgs/clang_osx-arm64-23.1.4-h2adb7b3_36.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 20575
+    },
+    {
+      "path": ".runtime/conda-pkgs/libdeflate-1.26-h72bfca4_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 55312
+    },
+    {
+      "path": ".runtime/conda-pkgs/openssl-3.6.5-h55eecbc_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 3111573
+    },
+    {
+      "path": ".runtime/conda-pkgs/libasprintf-0.25.1-hae62183_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 52487
+    },
+    {
+      "path": ".runtime/conda-pkgs/libcompiler-rt-23.1.4-hdb3d66b_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1383407
+    },
+    {
+      "path": ".runtime/conda-pkgs/libgfortran-16.2.0-h07b0088_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 99745
+    },
+    {
+      "path": ".runtime/conda-pkgs/lerc-4.3.0-h0699d0c_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 188293
+    },
+    {
+      "path": ".runtime/conda-pkgs/cctools_impl_osx-arm64-1030.6.3-llvm23_1_hf5e010b_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 759788
+    },
+    {
+      "path": ".runtime/conda-pkgs/sdkroot_env_osx-arm64-26.0-ha3f98da_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 4971
+    },
+    {
+      "path": ".runtime/conda-pkgs/r-matrixcalc-1.0_6-r44hc72bb7e_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 225539
+    },
+    {
+      "path": ".runtime/conda-pkgs/librsvg-2.58.4-h266df6f_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 4607782
+    },
+    {
+      "path": ".runtime/conda-pkgs/wheel-0.48.0-pyhd8ed1ab_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 34528
+    },
+    {
+      "path": ".runtime/conda-pkgs/harfbuzz-12.2.0-haf38c7b_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1537764
+    },
+    {
+      "path": ".runtime/conda-pkgs/libgcc-devel_osx-arm64-16.2.0-ha15413b_107.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 2128161
+    },
+    {
+      "path": ".runtime/conda-pkgs/icu-75.1-hfee45f7_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 11857802
+    },
+    {
+      "path": ".runtime/conda-pkgs/ffmpeg-7.1.0-gpl_h7c3f5a8_110.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 9146518
+    },
+    {
+      "path": ".runtime/conda-pkgs/gsl-2.7-h6e638da_0.tar.bz2",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 2734398
+    },
+    {
+      "path": ".runtime/conda-pkgs/libprotobuf-5.28.3-h3bd63a1_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 2271580
+    },
+    {
+      "path": ".runtime/conda-pkgs/libharfbuzz-15.0.0-hcda0f7c_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1146987
+    },
+    {
+      "path": ".runtime/conda-pkgs/lame-3.100-h1a8c8d9_1003.tar.bz2",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 528805
+    },
+    {
+      "path": ".runtime/conda-pkgs/libiconv-1.18-he4c29f2_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 750816
+    },
+    {
+      "path": ".runtime/conda-pkgs/libblas-3.11.0-12_h51639a9_openblas.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 18269
+    },
+    {
+      "path": ".runtime/conda-pkgs/openblas-0.3.34-openmp_hea878ba_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 3191100
+    },
+    {
+      "path": ".runtime/conda-pkgs/llvm-tools-23.1.4-hdb3d66b_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 52020
+    },
+    {
+      "path": ".runtime/conda-pkgs/libgettextpo-0.25.1-hae62183_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 182332
+    },
+    {
+      "path": ".runtime/conda-pkgs/pixman-0.46.4-h784d473_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 198717
+    },
+    {
+      "path": ".runtime/conda-pkgs/libxml2-16-2.15.4-heb56d2d_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 469239
+    },
+    {
+      "path": ".runtime/conda-pkgs/numpy-1.26.4-py312h8442bc7_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 6073136
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-auto-batch-plugin-2024.6.0-h7f72211_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 107453
+    },
+    {
+      "path": ".runtime/conda-pkgs/libclang-cpp23.1-23.1.4-default_h8bbc02d_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 16607160
+    },
+    {
+      "path": ".runtime/conda-pkgs/libusb-1.0.30-h602ebc4_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 89608
+    },
+    {
+      "path": ".runtime/conda-pkgs/libvpx-1.14.1-h7bae524_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1178981
+    },
+    {
+      "path": ".runtime/conda-pkgs/libev-4.33-h1a92334_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 39991
+    },
+    {
+      "path": ".runtime/conda-pkgs/x265-3.5-h55d2f36_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 990585
+    },
+    {
+      "path": ".runtime/conda-pkgs/readline-8.3-h8b90a29_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 314395
+    },
+    {
+      "path": ".runtime/conda-pkgs/font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 397370
+    },
+    {
+      "path": ".runtime/conda-pkgs/setuptools-84.2.1-pyhe730653_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 567436
+    },
+    {
+      "path": ".runtime/conda-pkgs/libcurl-8.21.0-hd5a2499_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 410285
+    },
+    {
+      "path": ".runtime/conda-pkgs/cmake-3.31.8-h54ad630_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 16632236
+    },
+    {
+      "path": ".runtime/conda-pkgs/dlib-19.24.2-py312h61fd0c1_2.tar.bz2",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 3477025
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-ir-frontend-2024.6.0-hd3d436d_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 176569
+    },
+    {
+      "path": ".runtime/conda-pkgs/libtiff-4.7.2-h87d37ca_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 380333
+    },
+    {
+      "path": ".runtime/conda-pkgs/font-ttf-source-code-pro-2.038-h77eed37_0.tar.bz2",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 700814
+    },
+    {
+      "path": ".runtime/conda-pkgs/ncurses-6.6-he64c551_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 804298
+    },
+    {
+      "path": ".runtime/conda-pkgs/xz-gpl-tools-5.8.3-hd0f0c4f_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 40035
+    },
+    {
+      "path": ".runtime/conda-pkgs/libgcc-16.2.0-h3cf6597_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 365973
+    },
+    {
+      "path": ".runtime/conda-pkgs/c-ares-1.34.9-h74c22ad_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 201979
+    },
+    {
+      "path": ".runtime/conda-pkgs/openexr-3.3.5-haaeed0a_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1096380
+    },
+    {
+      "path": ".runtime/conda-pkgs/libedit-3.1.20260512-pl5321h26f1114_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 108512
+    },
+    {
+      "path": ".runtime/conda-pkgs/krb5-1.22.2-h34f8a20_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1165740
+    },
+    {
+      "path": ".runtime/conda-pkgs/libfreetype6-2.14.3-h2ed5691_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 340923
+    },
+    {
+      "path": ".runtime/conda-pkgs/libboost-headers-1.85.0-hce30654_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 14130145
+    },
+    {
+      "path": ".runtime/conda-pkgs/libdeflate-1.25-he7e0567_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 55727
+    },
+    {
+      "path": ".runtime/conda-pkgs/libfreetype-2.14.3-hce30654_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 8367
+    },
+    {
+      "path": ".runtime/conda-pkgs/llvm-tools-23-23.1.4-h79441dc_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 18501966
+    },
+    {
+      "path": ".runtime/conda-pkgs/x264-1!164.3095-pl5321h4df14c8_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 616651
+    },
+    {
+      "path": ".runtime/conda-pkgs/graphite2-1.3.15-h784d473_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 86493
+    },
+    {
+      "path": ".runtime/conda-pkgs/tbb-devel-2022.3.0-h41f9aa9_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1116433
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenblas-0.3.34-openmp_h5e6e99c_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 4249236
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-tensorflow-lite-frontend-2024.6.0-h286801f_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 388265
+    },
+    {
+      "path": ".runtime/conda-pkgs/libass-0.17.3-h16a287c_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 138422
+    },
+    {
+      "path": ".runtime/conda-pkgs/gfortran_impl_osx-arm64-16.2.0-h9997696_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 13590087
+    },
+    {
+      "path": ".runtime/conda-pkgs/libcxx-devel-23.1.5-h6dc3340_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 21945
+    },
+    {
+      "path": ".runtime/conda-pkgs/libglib-2.90.0-hccd281b_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 4489939
+    },
+    {
+      "path": ".runtime/conda-pkgs/libnghttp2-1.71.0-h29223de_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 671516
+    },
+    {
+      "path": ".runtime/conda-pkgs/bzip2-1.0.8-h4e30115_10.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 124965
+    },
+    {
+      "path": ".runtime/conda-pkgs/fontconfig-2.18.3-h81aa574_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 265659
+    },
+    {
+      "path": ".runtime/conda-pkgs/libffi-3.7.0-h47dc5ef_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 43637
+    },
+    {
+      "path": ".runtime/conda-pkgs/libpango-1.58.2-hc2ac4f2_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 308102
+    },
+    {
+      "path": ".runtime/conda-pkgs/libllvm23-23.1.4-h759d1ac_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 31580468
+    },
+    {
+      "path": ".runtime/conda-pkgs/tapi-1600.0.11.8-hb561403_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 202107
+    },
+    {
+      "path": ".runtime/conda-pkgs/llvm-openmp-23.1.5-hdb3d66b_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 287928
+    },
+    {
+      "path": ".runtime/conda-pkgs/bwidget-1.10.1-h820172f_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 134656
+    },
+    {
+      "path": ".runtime/conda-pkgs/sigtool-codesign-0.1.3-h98dc951_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 114653
+    },
+    {
+      "path": ".runtime/conda-pkgs/libjpeg-turbo-3.2.1-hb001647_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 555606
+    },
+    {
+      "path": ".runtime/conda-pkgs/gdk-pixbuf-2.44.8-h5867e2c_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 552802
+    },
+    {
+      "path": ".runtime/conda-pkgs/clang_impl_osx-arm64-23.1.4-default_h8bbc02d_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 31915
+    },
+    {
+      "path": ".runtime/conda-pkgs/pip-26.2.2-pyh8b19718_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1076882
+    },
+    {
+      "path": ".runtime/conda-pkgs/dbus-1.16.2-hf049998_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 398252
+    },
+    {
+      "path": ".runtime/conda-pkgs/python_abi-3.12-9_cp312.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 6751
+    },
+    {
+      "path": ".runtime/conda-pkgs/snappy-1.2.2-h3951085_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 40420
+    },
+    {
+      "path": ".runtime/conda-pkgs/libhwloc-2.12.1-default_h88f92a7_1000.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 2355380
+    },
+    {
+      "path": ".runtime/conda-pkgs/compiler-rt23-23.1.4-hdb3d66b_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 99934
+    },
+    {
+      "path": ".runtime/conda-pkgs/python-3.12.15-hd05a0c4_1_cpython.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 11807004
+    },
+    {
+      "path": ".runtime/conda-pkgs/libtiff-4.7.2-hf67920b_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 380645
+    },
+    {
+      "path": ".runtime/conda-pkgs/font-ttf-ubuntu-0.83-h77eed37_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1619009
+    },
+    {
+      "path": ".runtime/conda-pkgs/hdf5-1.14.4-nompi_ha698983_105.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 3485821
+    },
+    {
+      "path": ".runtime/conda-pkgs/ca-certificates-2026.10.23-hbd8a1cb_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 130057
+    },
+    {
+      "path": ".runtime/conda-pkgs/xz-tools-5.8.3-h8088a28_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 85988
+    },
+    {
+      "path": ".runtime/conda-pkgs/tktable-2.10-h74c22ad_11.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 91653
+    },
+    {
+      "path": ".runtime/conda-pkgs/cairo-1.18.6-h580cee5_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 844614
+    },
+    {
+      "path": ".runtime/conda-pkgs/_r-mutex-1.0.1-anacondar_1.tar.bz2",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 3566
+    },
+    {
+      "path": ".runtime/conda-pkgs/clang-23.1.4-default_cfg_h10b8b15_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 32301
+    },
+    {
+      "path": ".runtime/conda-pkgs/libpython-3.12.15-h4e5ec87_1_cpython.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1739231
+    },
+    {
+      "path": ".runtime/conda-pkgs/libboost-1.85.0-hf763ba5_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1957773
+    },
+    {
+      "path": ".runtime/conda-pkgs/jasper-4.2.9-hc111fee_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 632962
+    },
+    {
+      "path": ".runtime/conda-pkgs/boost-cpp-1.85.0-h103c1d6_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 18337
+    },
+    {
+      "path": ".runtime/conda-pkgs/liblapacke-3.11.0-12_h1b118fd_openblas.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 18249
+    },
+    {
+      "path": ".runtime/conda-pkgs/aom-3.9.1-h7bae524_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 2235747
+    },
+    {
+      "path": ".runtime/conda-pkgs/clangxx_osx-arm64-23.1.4-h2adb7b3_36.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 19196
+    },
+    {
+      "path": ".runtime/conda-pkgs/ld64-956.6-llvm23_1_hd841b0c_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 21760
+    },
+    {
+      "path": ".runtime/conda-pkgs/dav1d-1.2.1-hb547adb_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 316394
+    },
+    {
+      "path": ".runtime/conda-pkgs/imath-3.1.12-h025cafa_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 153017
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenblas-0.3.34-openmp_h4f80526_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 4315889
+    },
+    {
+      "path": ".runtime/conda-pkgs/libboost-devel-1.85.0-hf450f58_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 41332
+    },
+    {
+      "path": ".runtime/conda-pkgs/gmp-6.3.0-hf5e55b1_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 399307
+    },
+    {
+      "path": ".runtime/conda-pkgs/pcre2-10.47-he63d830_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 851704
+    },
+    {
+      "path": ".runtime/conda-pkgs/libcxx-23.1.5-h55c6f16_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 577751
+    },
+    {
+      "path": ".runtime/conda-pkgs/libpng-1.6.59-hf5e6511_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 290299
+    },
+    {
+      "path": ".runtime/conda-pkgs/libcurl-8.23.0-h6651222_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 425637
+    },
+    {
+      "path": ".runtime/conda-pkgs/tk-8.6.13-hbeba79b_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 3342183
+    },
+    {
+      "path": ".runtime/conda-pkgs/openh264-2.5.0-h774163f_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 599874
+    },
+    {
+      "path": ".runtime/conda-pkgs/compiler-rt_osx-arm64-23.1.4-hce30654_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 16632
+    },
+    {
+      "path": ".runtime/conda-pkgs/xz-5.8.3-hd0f0c4f_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 23456
+    },
+    {
+      "path": ".runtime/conda-pkgs/clang-23-23.1.4-default_hde1afa0_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 955290
+    },
+    {
+      "path": ".runtime/conda-pkgs/clangxx_impl_osx-arm64-23.1.4-default_h8b65321_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 31979
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-pytorch-frontend-2024.6.0-h286801f_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 794463
+    },
+    {
+      "path": ".runtime/conda-pkgs/libexpat-2.9.0-h6111c0a_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 69681
+    },
+    {
+      "path": ".runtime/conda-pkgs/libsigtool-0.1.3-h98dc951_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 36651
+    },
+    {
+      "path": ".runtime/conda-pkgs/packaging-26.3-pyhc364b38_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 116363
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-2024.6.0-h97facdf_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 4034356
+    },
+    {
+      "path": ".runtime/conda-pkgs/make-4.4.1-h63fc045_4.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 296222
+    },
+    {
+      "path": ".runtime/conda-pkgs/libvulkan-loader-1.4.357.0-hfbe1efa_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 186735
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-tensorflow-frontend-2024.6.0-he275e1d_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 958238
+    },
+    {
+      "path": ".runtime/conda-pkgs/freetype-2.14.3-hce30654_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 175388
+    },
+    {
+      "path": ".runtime/conda-pkgs/libxml2-2.13.9-h4a9ca0c_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 581379
+    },
+    {
+      "path": ".runtime/conda-pkgs/compiler-rt23_osx-arm64-23.1.4-hb8825d9_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 10372678
+    },
+    {
+      "path": ".runtime/conda-pkgs/tzdata-2026e-h5d301ff_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 119208
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopencv-4.10.0-headless_py312hb22ed7f_15.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 22019703
+    },
+    {
+      "path": ".runtime/conda-pkgs/_openmp_mutex-4.5-8_kmp_llvm.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 8016
+    },
+    {
+      "path": ".runtime/conda-pkgs/fribidi-1.0.18-hb001647_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 64404
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-paddle-frontend-2024.6.0-h76e6831_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 429395
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopus-1.6.1-h74c22ad_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 317033
+    },
+    {
+      "path": ".runtime/conda-pkgs/liblzma-devel-5.8.3-h8088a28_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 118908
+    },
+    {
+      "path": ".runtime/conda-pkgs/svt-av1-2.3.0-hf24288c_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1387330
+    },
+    {
+      "path": ".runtime/conda-pkgs/libzlib-1.3.2-h8088a28_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 47822
+    },
+    {
+      "path": ".runtime/conda-pkgs/libclang13-23.1.4-default_hde1afa0_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 10617161
+    },
+    {
+      "path": ".runtime/conda-pkgs/fonts-conda-forge-1-hc364b38_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 4059
+    },
+    {
+      "path": ".runtime/conda-pkgs/libopenvino-onnx-frontend-2024.6.0-h76e6831_3.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1274339
+    },
+    {
+      "path": ".runtime/conda-pkgs/cctools_osx-arm64-1030.6.3-llvm23_1_h54b4f4b_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 23662
+    },
+    {
+      "path": ".runtime/conda-pkgs/cctools-1030.6.3-llvm23_1_h54b4f4b_7.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 24477
+    },
+    {
+      "path": ".runtime/conda-pkgs/clang-scan-deps-23.1.4-default_h8bbc02d_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 114803
+    },
+    {
+      "path": ".runtime/conda-pkgs/libcxx-headers-23.1.5-h707e725_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 1176606
+    },
+    {
+      "path": ".runtime/conda-pkgs/pango-1.56.4-h875632e_0.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 426931
+    },
+    {
+      "path": ".runtime/conda-pkgs/icu-78.3-py310h579977c_2.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 14070242
+    },
+    {
+      "path": ".runtime/conda-pkgs/libxml2-2.15.4-h550178d_1.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 41382
+    },
+    {
+      "path": ".runtime/conda-pkgs/liblapack-3.11.0-12_hd9741b5_openblas.conda",
+      "reason": "downloaded installer archive; installed and unpacked packages retained",
+      "bytes": 18259
+    },
+    {
+      "path": "__pycache__/main.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 40736
+    },
+    {
+      "path": "__pycache__/face_hand_landmarks.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 15379
+    },
+    {
+      "path": "__pycache__/tracking_config.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 7610
+    },
+    {
+      "path": "__pycache__/build_native.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 6524
+    },
+    {
+      "path": "__pycache__/tracking_config.cpython-314.pyc",
+      "reason": "regenerable cache",
+      "bytes": 9624
+    },
+    {
+      "path": "__pycache__/camera_movement.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 11606
+    },
+    {
+      "path": "__pycache__/behaviour_common.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 1643
+    },
+    {
+      "path": "__pycache__/teaching_aids.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 24105
+    },
+    {
+      "path": "__pycache__/window_summary.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 14370
+    },
+    {
+      "path": "__pycache__/setup_tracking.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 9091
+    },
+    {
+      "path": "__pycache__/body_gestures.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 39620
+    },
+    {
+      "path": "__pycache__/native_tracking.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 14975
+    },
+    {
+      "path": "__pycache__/facial_expressions.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 31781
+    },
+    {
+      "path": "tests/__pycache__/test_behaviour_pipeline.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 20009
+    },
+    {
+      "path": "tests/__pycache__/test_tracking_backends.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 34728
+    },
+    {
+      "path": "tests/__pycache__/test_face_hand_landmarks.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 7141
+    },
+    {
+      "path": "tests/__pycache__/test_facing_turning.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 5305
+    },
+    {
+      "path": "tests/__pycache__/test_window_summary.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 16099
+    },
+    {
+      "path": "tests/__pycache__/test_hand_movement.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 9707
+    },
+    {
+      "path": "tests/__pycache__/test_arm_gestures.cpython-312.pyc",
+      "reason": "regenerable cache",
+      "bytes": 6362
+    },
+    {
+      "path": ".runtime/matplotlib/fontlist-v3.11.0.json",
+      "reason": "regenerable cache",
+      "bytes": 289954
+    },
+    {
+      "path": ".DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 10244
+    },
+    {
+      "path": "output/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 8196
+    },
+    {
+      "path": ".runtime/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": ".runtime/r/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 8196
+    },
+    {
+      "path": ".runtime/openface/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 8196
+    },
+    {
+      "path": ".runtime/openface/include/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": ".runtime/openface/include/boost/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": ".runtime/openface/share/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": ".runtime/openface/share/cmake-3.31/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": ".runtime/conda-pkgs/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 47108
+    },
+    {
+      "path": ".runtime/conda-pkgs/cmake-3.31.8-h54ad630_0/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": ".runtime/conda-pkgs/cmake-3.31.8-h54ad630_0/share/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": ".runtime/conda-pkgs/cmake-3.31.8-h54ad630_0/share/cmake-3.31/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": ".runtime/conda-pkgs/libboost-headers-1.85.0-hce30654_4/include/boost/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": "external/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": "external/OpenFace/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": "external/OpenFace/model_training/AU_training/data extraction/xml_io_tools_2010_11_05/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": "outputs/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 14340
+    },
+    {
+      "path": "outputs/archive/openface_hmad_30s/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": "outputs/archive/openface_hmad_30s/native/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": "outputs/runs/calculus_lecture/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": "outputs/runs/calculus_lecture/native/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": "outputs/validation/calculus_2min_test/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": "outputs/validation/calculus_2min_test/native/.DS_Store",
+      "reason": "Finder metadata",
+      "bytes": 6148
+    },
+    {
+      "path": "outputs/tracking_cli_help.txt",
+      "reason": "generated CLI help; available with --help",
+      "bytes": 2723
+    },
+    {
+      "path": "outputs/.calculus_2min_test_run_state.json",
+      "reason": "completed temporary run state; verification report retained",
+      "bytes": 476
+    },
+    {
+      "path": "scripts/diagnostics/debug_bagmad.R",
+      "reason": "superseded ad-hoc BAGMAD debug script; canonical bridge and diagnostic results retained",
+      "bytes": 724
+    }
+  ],
+  "removed_bytes": 398875308,
+  "deduplicated_bytes": 862464765,
+  "elan_media_link_repairs": [
+    "outputs/validation/native_current_verified/hmad_workspace/projects/URECA/OPENFACE/bagmad/result/bagmad.eaf",
+    "outputs/runs/calculus_lecture/native/hmad_workspace/projects/URECA/OPENFACE/bagmad/result/bagmad.eaf",
+    "outputs/runs/macroeconomics_lecture/native/hmad_workspace/projects/URECA/OPENFACE/bagmad/result/bagmad.eaf",
+    "outputs/archive/openface_hmad_30s_v2/native/hmad_workspace/projects/URECA/OPENFACE/bagmad/result/bagmad.eaf"
+  ],
+  "elan_original_media_fallbacks": [
+    {
+      "path": "outputs/archive/openface_hmad_30s_v2/native/hmad_workspace/projects/URECA/OPENFACE/bagmad/result/bagmad.eaf",
+      "original_media_url": "file:////Users/texas/Desktop/NTU learning docs/AY2-Sem1/Ureca/ureca project/outputs/archive/openface_hmad_30s_v2/native/hmad_workspace/projects/URECA/analysis.avi",
+      "media": "/Users/texas/Desktop/NTU learning docs/AY2-Sem1/Ureca/ureca project/data/videos/calculus_lecture.webm",
+      "reason": "historical analysis.avi was already absent; full-frame original video shares the annotation timeline"
+    }
+  ],
+  "historical_missing_references": [
+    {
+      "records": [
+        "outputs/validation/calculus_2min_test/calculus_lecture_metadata.json",
+        "outputs/validation/calculus_2min_test/native/manifest.json",
+        "outputs/validation/calculus_2min_test/native/hmad_results/manifest.json"
+      ],
+      "field": "openface_input",
+      "reference": "outputs/calculus_2min_test_failed_1db320da72/native/processed/analysis.csv",
+      "note": "pre-existing absent import source; usable copied CSV is retained under native/openface.csv and matches the recorded hash"
+    },
+    {
+      "records": [
+        "logs/environment_migration/manifest.json"
+      ],
+      "field": "source",
+      "reference": ".venv",
+      "note": "pre-existing environment migration history; active environment remains the ureca conda environment"
+    }
+  ],
+  "verification": {
+    "unit_tests": 56,
+    "dependency_preflight": "passed",
+    "source_hash_records_checked": 23,
+    "native_csv_hash_records_checked": 21,
+    "relative_symlinks_checked": 7,
+    "elan_media_links_checked": 4,
+    "formal_window_exports_byte_identical": [
+      "calculus_lecture",
+      "macroeconomics_lecture"
+    ],
+    "real_video_smoke": {
+      "seconds": 0.2,
+      "processed_frames": 6,
+      "native_results": "reused",
+      "mediapipe": "real inference",
+      "graphics_access": "required; succeeded with macOS graphics services"
+    },
+    "hmad_r_bridge": "30-second measurements reprocessed; all 8 reported component statuses ok",
+    "markdown_links": "all local documentation links exist"
+  }
+}

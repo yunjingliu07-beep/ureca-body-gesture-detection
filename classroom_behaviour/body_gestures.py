@@ -4,7 +4,7 @@ BodyGestureExtractor owns the MediaPipe Pose and optional Hand models.
 BodyGestureDetector contains arm/finger geometry and temporal classroom rules.
 It needs a fixed camera, one visible
 speaker, and scene annotations for location-dependent labels. See
-BEHAVIOUR_RULES.md for every equation, unit, threshold, and limitation.
+docs/behaviour_rules.md for every equation, unit, threshold, and limitation.
 """
 
 from collections import deque
@@ -451,7 +451,7 @@ class BodyGestureExtractor:
 
     def __enter__(self):
         import mediapipe as mp
-        from face_hand_landmarks import FaceHandLandmarkers
+        from .landmarks import FaceHandLandmarkers
         try:
             options = mp.tasks.vision.PoseLandmarkerOptions(
                 base_options=mp.tasks.BaseOptions(model_asset_path=str(self.pose_model),

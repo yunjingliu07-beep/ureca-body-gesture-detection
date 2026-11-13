@@ -7,7 +7,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from window_summary import main, write_window_summary
+from classroom_behaviour.window_summary import main, write_window_summary
 
 
 class WindowSummaryTests(unittest.TestCase):

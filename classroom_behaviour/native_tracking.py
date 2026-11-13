@@ -131,7 +131,7 @@ def prepare_native(args, work, duration_s, roi_px):
         hmad = Path(args.hmad_dir).resolve()
         for name in ("sourceR", "sourceObjectR", "models"):
             if not (hmad / name).is_dir():
-                raise ValueError(f"Missing HMAD {name} in {hmad}; run setup_tracking.py --download-hmad")
+                raise ValueError(f"Missing HMAD {name} in {hmad}; run python -m scripts.setup_models --download-hmad")
         root = work / "hmad_workspace"
         root.mkdir()
         for name in ("sourceR", "sourceObjectR", "models"):

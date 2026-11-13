@@ -9,7 +9,7 @@ from unittest.mock import Mock
 
 import numpy as np
 
-from face_hand_landmarks import BLENDSHAPE_NAMES, FaceHandLandmarkers
+from classroom_behaviour.landmarks import BLENDSHAPE_NAMES, FaceHandLandmarkers
 
 
 def points(count, x):

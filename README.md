@@ -10,11 +10,30 @@ The pipeline combines **OpenFace 2.2 + HMAD**, MediaPipe Pose/Hands and
   book, paper or tablet.
 - Existing body, arm, finger, hand-motion and classroom-location behaviours.
 
-The old face-to-neck head-turn heuristic and MediaPipe blendshape expression
-rules are removed from `main.py`. Facial analysis is offline and uses the native
+Facial analysis is offline and uses the native
 OpenFace executable and HMAD's R models. Teaching-aid holding and camera-relative
 movement are project heuristics awaiting accuracy validation on annotated clips.
 A smile does not establish happiness; holding a marker does not establish writing.
+
+## Repository layout
+
+从仓库根目录运行下面的命令。代码已归入 Python 包，入口为
+`python -m classroom_behaviour`。整理说明与旧文件名对照见
+[docs/reorganization.md](docs/reorganization.md)。
+
+| 路径 | 用途 |
+| --- | --- |
+| `classroom_behaviour/` | 视频分析、行为识别、窗口统计和 R 桥接代码 |
+| `scripts/` | 原生依赖构建与模型下载 |
+| `configs/` | 配置示例和本地配置 |
+| `data/videos/` | 原始视频，统一使用简短英文文件名 |
+| `outputs/runs/` | 正式分析结果 |
+| `outputs/validation/` | 已核验的运行记录 |
+| `outputs/archive/` | 历史和未完成的调试结果 |
+| `logs/` | 构建、运行及环境迁移日志 |
+| `models/` | 模型权重与模型说明 |
+| `external/`, `.runtime/` | 第三方源码与本地原生运行环境 |
+| `docs/`, `tests/`, `requirements/` | 研究规则与说明、测试、可选依赖 |
 
 ## Run
 
@@ -22,12 +41,12 @@ Activate the project environment, then check tools and models:
 
 ```sh
 conda activate ureca
-python main.py --check-dependencies
-python main.py --output-dir outputs/my_first_tracking_run
+python -m classroom_behaviour --check-dependencies
+python -m classroom_behaviour --output-dir outputs/runs/my_first_tracking_run
 ```
 
 The default input is **Calculus 1 Lecture 0.1: Lines, Angle of Inclination, and
-the Distance Formula**, the WebM in the project root. The default duration is
+the Distance Formula**, `data/videos/calculus_lecture.webm`. The default duration is
 30 seconds. Use a new empty output directory for each run.
 Every run also exports gesture durations in consecutive **30-second windows**
 to `*_windows.csv`, alongside the frame-by-frame recognition and review video.
@@ -36,10 +55,10 @@ to `*_windows.csv`, alongside the frame-by-frame recognition and review video.
 
 ```sh
 # Body, hands, head, face and gaze; object detector stays unloaded.
-python main.py --teaching-aids off --output-dir outputs/body_face_run
+python -m classroom_behaviour --teaching-aids off --output-dir outputs/runs/body_face_run
 
 # Enable the additional teaching-aid detector (slower).
-python main.py --teaching-aids on --objects-device mps --output-dir outputs/with_teaching_aids
+python -m classroom_behaviour --teaching-aids on --objects-device mps --output-dir outputs/runs/with_teaching_aids
 ```
 
 Omitting `--teaching-aids` also selects `off`. The selected mode is printed
@@ -49,17 +68,17 @@ weights, or run object inference. The existing `--no-objects` flag remains an
 alias for `--teaching-aids off`. Body, hand and facial extraction still run.
 
 ```sh
-python main.py --input "/path/to/classroom.mp4" --seconds 30 --output-dir outputs/classroom_30s
-python main.py --full-video --output-dir outputs/full_lecture
-python main.py --config classroom_config.example.json --show-scene --output-dir outputs/scene_run
-python main.py --view mask --output-dir outputs/mask_run
+python -m classroom_behaviour --input "/path/to/classroom.mp4" --seconds 30 --output-dir outputs/runs/classroom_30s
+python -m classroom_behaviour --full-video --output-dir outputs/runs/full_lecture
+python -m classroom_behaviour --config configs/classroom.example.json --show-scene --output-dir outputs/runs/scene_run
+python -m classroom_behaviour --view mask --output-dir outputs/runs/mask_run
 
 # Fixed crop containing a single teacher; normalized x0 y0 x1 y1.
-python main.py --teacher-roi 0.1 0.05 0.6 0.95 --output-dir outputs/teacher_crop
+python -m classroom_behaviour --teacher-roi 0.1 0.05 0.6 0.95 --output-dir outputs/runs/teacher_crop
 
 # Explicitly disable individual branches for a diagnostic run.
-python main.py --no-objects --output-dir outputs/without_objects
-python main.py --no-face --no-objects --output-dir outputs/body_only
+python -m classroom_behaviour --no-objects --output-dir outputs/runs/without_objects
+python -m classroom_behaviour --no-face --no-objects --output-dir outputs/runs/body_only
 ```
 
 `--no-face` makes head/face/gaze/depth-dependent labels unknown. `--no-hands`
@@ -83,19 +102,19 @@ These directories and downloaded model weights are excluded from Git.
 
 ```sh
 conda activate ureca
-python -m pip install -r requirements-objects.txt
+python -m pip install -r requirements/objects.txt
 
 # macOS arm64: build pinned OpenFace and install isolated R + matrixcalc.
-python build_native.py
-python setup_tracking.py --download-hmad --download-object-model
-python main.py --check-dependencies
+python -m scripts.build_native
+python -m scripts.setup_models --download-hmad --download-object-model
+python -m classroom_behaviour --check-dependencies
 ```
 
 For body/facial runs only, `requirements.txt` is sufficient for the Python
-dependencies; `requirements-objects.txt` and the Grounding DINO download are
+dependencies; `requirements/objects.txt` and the Grounding DINO download are
 needed when enabling teaching aids. OpenFace/R/HMAD are still required for faces.
 
-`build_native.py` requires conda and Xcode Command Line Tools. It installs native
+`scripts/build_native.py` requires conda and Xcode Command Line Tools. It installs native
 libraries locally, builds dlib/OpenFace, downloads the four CE-CLM landmark
 experts, and repairs conda R's unquoted path assignments for this workspace's
 spaces. The dlib source build includes one explicit template-argument adjustment
@@ -108,14 +127,14 @@ and `.runtime/r/bin/Rscript` when present. On another system, follow the
 install R with `matrixcalc`, and supply paths:
 
 ```sh
-python main.py --openface-bin "/path/to/FeatureExtraction" \
+python -m classroom_behaviour --openface-bin "/path/to/FeatureExtraction" \
   --hmad-dir "/path/to/HMAD" --rscript "/path/to/Rscript" \
-  --output-dir outputs/native_custom_paths
+  --output-dir outputs/runs/native_custom_paths
 ```
 
 MediaPipe Pose and Hand models are documented in [models/README.md](models/README.md).
 The former MediaPipe Face model is not required by this pipeline. Attribution,
-upstream revisions and license notes are in [THIRD_PARTY.md](THIRD_PARTY.md).
+upstream revisions and license notes are in [docs/third_party.md](docs/third_party.md).
 On macOS, MediaPipe can require terminal access to graphics services even for
 CPU inference.
 
@@ -137,8 +156,8 @@ intervals are rejected.
 To reuse a matching zero-start 25 fps OpenFace CSV:
 
 ```sh
-python main.py --openface-csv "/prior/native/processed/analysis.csv" \
-  --no-objects --output-dir outputs/reuse_measurements
+python -m classroom_behaviour --openface-csv "/prior/native/processed/analysis.csv" \
+  --no-objects --output-dir outputs/runs/reuse_measurements
 ```
 
 To reuse HMAD inference too, add `--hmad-results /prior/native/hmad_results`.
@@ -154,9 +173,9 @@ source frames. Native event times are clipped to the rendered duration.
 
 ## Configuration and rules
 
-[BEHAVIOUR_RULES.md](BEHAVIOUR_RULES.md) defines each rule, threshold, timing,
+[docs/behaviour_rules.md](docs/behaviour_rules.md) defines each rule, threshold, timing,
 coordinate convention, missing-data policy and limitation. Copy
-[classroom_config.example.json](classroom_config.example.json) to your own file
+[configs/classroom.example.json](configs/classroom.example.json) to your own file
 and adjust it. Its sections are `body`, `face`, `head`, `gaze`, `camera_motion`,
 `objects`, `scene` and `confirmation_s`.
 
@@ -218,10 +237,10 @@ runs summarize the entire decoded duration. Change the window size if needed:
 
 ```sh
 # Four consecutive 30-second windows; teaching-aid detection stays off.
-python main.py --seconds 120 --output-dir outputs/gesture_windows_2min
+python -m classroom_behaviour --seconds 120 --output-dir outputs/runs/gesture_windows_2min
 
 # Entire source, with a shorter summary interval.
-python main.py --full-video --window-seconds 15 --output-dir outputs/gesture_windows_15s
+python -m classroom_behaviour --full-video --window-seconds 15 --output-dir outputs/runs/gesture_windows_15s
 ```
 
 Each row identifies `window_index` (starting at 1), `window_start_s`,
@@ -257,9 +276,9 @@ does not report a false zero-duration detection result.
 To generate a window CSV from existing frame/event exports without rerunning models:
 
 ```sh
-python window_summary.py --metadata "/prior/run/video_metadata.json"
+python -m classroom_behaviour.window_summary --metadata "/prior/run/video_metadata.json"
 # Older 120s runs may contain an encoded fractional tail; select the exact prefix:
-python window_summary.py --metadata "/prior/run/video_metadata.json" --duration-seconds 120
+python -m classroom_behaviour.window_summary --metadata "/prior/run/video_metadata.json" --duration-seconds 120
 ```
 
 The helper writes/replaces only `*_windows.csv` (or the path given by `--output`).
@@ -269,8 +288,8 @@ New runs record window settings, coverage policy and the CSV path in metadata.
 
 ```sh
 python -m unittest discover -s tests -v
-python main.py --help
-python main.py --check-dependencies
+python -m classroom_behaviour --help
+python -m classroom_behaviour --check-dependencies
 ```
 
 The tests cover existing body/hand geometry plus native timestamp joins, 25 fps
@@ -287,11 +306,11 @@ Verified on 12 November 2026:
 | Check | Result |
 | --- | --- |
 | Automated tests | 56 passed, including detector selection, window timing and CSV integration |
-| 30-second window export | Existing 2-minute body/face results summarized into 4 windows × 51 behaviours = 204 rows; body durations cross-checked against frame states and head-cycle counts against events; see `outputs/calculus_2min_test/*_windows.csv` |
+| 30-second window export | Existing 2-minute body/face results summarized into 4 windows × 51 behaviours = 204 rows; body durations cross-checked against frame states and head-cycle counts against events; see `outputs/validation/calculus_2min_test/*_windows.csv` |
 | Native OpenFace extraction | 751 analysis frames at 25 fps covering the 30-second lecture selection |
-| Current HMAD bridge | Head model, AUs, smiles, brows, blink model, gaze model and ELAN export all succeeded; see `outputs/native_current_verified/` |
-| Native/body video run | 900 source frames decoded and matched 900 CSV rows, 30.03 s; see `outputs/openface_hmad_30s_final/verification.json` |
-| All-branches video run | 90 frames / 3.003 s with real Grounding DINO inference; see `outputs/all_tracking_3s/verification.json` |
+| Current HMAD bridge | Head model, AUs, smiles, brows, blink model, gaze model and ELAN export all succeeded; see `outputs/validation/native_current_verified/` |
+| Native/body video run | 900 source frames decoded and matched 900 CSV rows, 30.03 s; see `outputs/validation/openface_hmad_30s_final/verification.json` |
+| All-branches video run | 90 frames / 3.003 s with real Grounding DINO inference; see `outputs/validation/all_tracking_3s/verification.json` |
 
 The all-branches sample produced object candidates but **no confirmed holding
 episode**. Camera-relative movement stayed unknown because the footage did not
@@ -302,4 +321,4 @@ longer than playback. Existing native measurements were reused for rendering;
 the original OpenFace extraction and fresh current R bridge were also tested
 separately. Historical MediaPipe-only outputs are not validation of this backend.
 A real Grounding DINO inference on the Apple M4 MPS device also completed
-successfully; that smoke check is in `outputs/object_model_smoke/mps_result.json`.
+successfully; that smoke check is in `outputs/validation/object_model_smoke/mps_result.json`.

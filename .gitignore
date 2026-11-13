@@ -1,6 +1,10 @@
 # Local data, generated results, and downloaded model weights.
-outputs/
-output/
+outputs/*
+!outputs/README.md
+logs/*
+!logs/README.md
+data/videos/*
+!data/videos/README.md
 external/
 models/hf-cache/
 *.pt
@@ -28,3 +32,4 @@ venv/
 .env.*
 !.env.example
 *.log
+configs/*.local.json

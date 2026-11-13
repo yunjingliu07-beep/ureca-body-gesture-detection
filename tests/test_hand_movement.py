@@ -6,9 +6,9 @@ import unittest
 
 import numpy as np
 
-from behaviour_common import TemporalGate
-from body_gestures import BODY_LABELS, BodyGestureDetector, BodyRules
-from main import EventWriter
+from classroom_behaviour.temporal import TemporalGate
+from classroom_behaviour.body_gestures import BODY_LABELS, BodyGestureDetector, BodyRules
+from classroom_behaviour.cli import EventWriter
 
 
 def upper_body():

@@ -10,7 +10,7 @@ import math
 import cv2
 import numpy as np
 
-from tracking_config import CameraMovementRules
+from .config import CameraMovementRules
 
 
 CAMERA_LABELS = ("moving_toward_camera", "moving_away_from_camera")

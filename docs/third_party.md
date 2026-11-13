@@ -25,7 +25,7 @@ Apple Clang. OpenCV, OpenBLAS and Boost retain their own license terms.
 `227a155b4fa20970ca559e019beb47b5c3f01d61`, supplies head-model residuals, SMAD
 smile intensity, EBMAD eyebrow movements and BAGMAD blink/gaze annotations.
 Upstream R sources/models and their original GPL-3.0-or-later notices remain
-in a separate local checkout. `hmad_bridge.R` calls the upstream functions;
+in a separate local checkout. `classroom_behaviour/hmad_bridge.R` calls the upstream functions;
 the Python adapter does not replace their learned models with AU thresholds.
 
 HMAD is executed in a fresh working copy. The adapter changes the encoding alias
@@ -61,11 +61,11 @@ Transformers, tokenizers and safetensors under their respective licenses.
 ## MediaPipe and other Python libraries
 
 The body/hand extractor uses MediaPipe and Google's official Pose/Hand model
-bundles. Model URLs and checksums are in [models/README.md](models/README.md).
+bundles. Model URLs and checksums are in [models/README.md](../models/README.md).
 The former MediaPipe Face utility/model is retained for standalone helpers;
-it is not the active head/expression/gaze mechanism in `main.py`.
+it is not the active head/expression/gaze mechanism in `classroom_behaviour/cli.py`.
 
 The project also uses NumPy, OpenCV, Pillow and SciPy. Standalone gesture rules
-in `body_gestures.py` have no game-controller or keyboard-automation dependency.
+in `classroom_behaviour/body_gestures.py` have no game-controller or keyboard-automation dependency.
 FFmpeg creates the analysis copy; R and matrixcalc run HMAD. Respect each
 package's license when redistributing environments or executables.

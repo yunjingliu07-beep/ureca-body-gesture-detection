@@ -17,17 +17,17 @@ Missing evidence remains unknown. Several labels can be true together.
 
 | File | Purpose |
 | --- | --- |
-| `main.py` | Validate dependencies/config, prepare native analysis, merge source-time observations, render/export review outputs |
-| `native_tracking.py` | Create the 25 fps analysis copy; run OpenFace and R/HMAD; retain provenance, hashes and component status |
-| `hmad_bridge.R` | Run upstream head/residual, SMAD, EBMAD and BAGMAD models and export canonical interval tables |
-| `facial_expressions.py` | Stream native measurements, map HMAD labels, detect completed nod/shake cycles and join to source video |
-| `body_gestures.py` | MediaPipe Pose/Hands, body/mask/hand extraction and existing body/classroom rules |
-| `camera_movement.py` | Background camera-motion/cut checks and corroborated toward/away detection |
-| `teaching_aids.py` | Grounding DINO inference, teacher-hand association, grasp/contact/motion evidence and holding confirmation |
-| `tracking_config.py` | Validated face, head, gaze, camera-movement and object settings |
-| `behaviour_common.py` | Continuous-positive timing gate |
-| `face_hand_landmarks.py` | Low-level hand helper; its legacy standalone Face utility is not the active face backend |
-| `setup_tracking.py`, `build_native.py` | Download model/source assets; reproduce the isolated macOS arm64 native build |
+| `classroom_behaviour/cli.py` | Validate dependencies/config, prepare native analysis, merge source-time observations, render/export review outputs |
+| `classroom_behaviour/native_tracking.py` | Create the 25 fps analysis copy; run OpenFace and R/HMAD; retain provenance, hashes and component status |
+| `classroom_behaviour/hmad_bridge.R` | Run upstream head/residual, SMAD, EBMAD and BAGMAD models and export canonical interval tables |
+| `classroom_behaviour/facial_expressions.py` | Stream native measurements, map HMAD labels, detect completed nod/shake cycles and join to source video |
+| `classroom_behaviour/body_gestures.py` | MediaPipe Pose/Hands, body/mask/hand extraction and existing body/classroom rules |
+| `classroom_behaviour/camera_movement.py` | Background camera-motion/cut checks and corroborated toward/away detection |
+| `classroom_behaviour/teaching_aids.py` | Grounding DINO inference, teacher-hand association, grasp/contact/motion evidence and holding confirmation |
+| `classroom_behaviour/config.py` | Validated face, head, gaze, camera-movement and object settings |
+| `classroom_behaviour/temporal.py` | Continuous-positive timing gate |
+| `classroom_behaviour/landmarks.py` | Low-level hand helper; its legacy standalone Face utility is not the active face backend |
+| `scripts/setup_models.py`, `scripts/build_native.py` | Download model/source assets; reproduce the isolated macOS arm64 native build |
 
 The pipeline is offline: OpenFace extraction, R/HMAD processing, then merging and
 rendering with body/hand/object inference. HMAD sequence models and the head
@@ -80,10 +80,10 @@ postures use `confirmation_s` (0.25 s); object holding uses its own 0.4 s gate.
 | Turning left / `turning_left` | Valid OpenFace head yaw, normalized to image directions, is < -15 degrees. See head rules below. | `head.turn_yaw_deg = 15` |
 | Turning right / `turning_right` | Same yaw is > +15 degrees. | Same head setting |
 | Turning / `turning` | Either directional head-posture rule is true. A held side-facing head remains labelled. | Head setting and 0.25 s confirmation |
-| Raising a hand / `left_hand_raised`, `right_hand_raised` | Wrist is above its same-side shoulder by >= 0.15 shoulder widths. Elbow straightness/visibility is not required, so a bent-elbow raise is accepted. | Existing rule in `body_gestures.py` |
-| Extending arms / `left_arm_extended`, `right_arm_extended` | Shoulder-elbow-wrist image angle >= 155 degrees. Direction is one of eight image directions using 45-degree bins. | Existing rule in `body_gestures.py` |
-| Coarse pointing / `left_pointing_direction`, `right_pointing_direction` | Arm is extended and its direction is horizontal or upward (exclude the three downward bins). This is a pointing-direction proxy; an open hand can qualify. | Dedicated proxy rule in `body_gestures.py` |
-| Finger-confirmed pointing / `left_hand_pointing`, `right_hand_pointing` | Index PIP angle >= 155 degrees, DIP >= 150 degrees, and wrist-tip distance > 1.1 wrist-PIP distance. At least two of middle/ring/little fingers are curled: MCP-PIP-tip angle < 140 degrees OR wrist-tip distance < 1.05 wrist-PIP distance. Thumb ignored. All 21 hand points must be finite/in-frame, with exactly one qualifying handedness result per side and handedness score >= 0.7. | Existing rule in `body_gestures.py`; `handedness_confidence` |
+| Raising a hand / `left_hand_raised`, `right_hand_raised` | Wrist is above its same-side shoulder by >= 0.15 shoulder widths. Elbow straightness/visibility is not required, so a bent-elbow raise is accepted. | Existing rule in `classroom_behaviour/body_gestures.py` |
+| Extending arms / `left_arm_extended`, `right_arm_extended` | Shoulder-elbow-wrist image angle >= 155 degrees. Direction is one of eight image directions using 45-degree bins. | Existing rule in `classroom_behaviour/body_gestures.py` |
+| Coarse pointing / `left_pointing_direction`, `right_pointing_direction` | Arm is extended and its direction is horizontal or upward (exclude the three downward bins). This is a pointing-direction proxy; an open hand can qualify. | Dedicated proxy rule in `classroom_behaviour/body_gestures.py` |
+| Finger-confirmed pointing / `left_hand_pointing`, `right_hand_pointing` | Index PIP angle >= 155 degrees, DIP >= 150 degrees, and wrist-tip distance > 1.1 wrist-PIP distance. At least two of middle/ring/little fingers are curled: MCP-PIP-tip angle < 140 degrees OR wrist-tip distance < 1.05 wrist-PIP distance. Thumb ignored. All 21 hand points must be finite/in-frame, with exactly one qualifying handedness result per side and handedness score >= 0.7. | Existing rule in `classroom_behaviour/body_gestures.py`; `handedness_confidence` |
 | Approaching a group / `approaching_group` | For an annotated group polygon, ankle-midpoint distance to its boundary decreases >= 0.25 T/s over the history window, starts outside 1.0 T, and ends within 3.0 T. Distance is zero inside the polygon. | scene `groups`, `approach_speed`, `arrival_radius`, `approach_radius` |
 | Group arrival / `group_arrival` | The approaching rule holds and current boundary distance <= 1.0 T. This is a window-based arrival episode, not permanent occupancy. | `arrival_radius` |
 | Standing / `standing` | Both hip-knee-ankle angles >= 160 degrees, and shoulder-to-hip torso axis is within 25 degrees of downward image vertical | `standing_knee_deg`, `standing_tilt_deg` |
@@ -93,7 +93,7 @@ The additional `arms_crossed` label requires both elbow angles < 150 degrees,
 wrists crossing toward the opposite upper arms, wrist height from 0.2 shoulder
 widths above to 1.2 below the shoulder midpoint, and each wrist within 0.65
 shoulder widths of the opposite shoulder-elbow segment. See `classify_frame`
-in `body_gestures.py` for the exact projections.
+in `classroom_behaviour/body_gestures.py` for the exact projections.
 
 ### General left/right hand movement
 
@@ -382,7 +382,7 @@ is execution evidence, not an accuracy benchmark.
   The local build helper records the macOS compiler compatibility adjustments.
 - OpenFace's [research-use terms](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/Copyright.txt)
   and HMAD's [GPL license](https://github.com/srauzy/HMAD/blob/master/LICENSE)
-  must be recorded with attribution in `THIRD_PARTY.md` during implementation.
+  must be recorded with attribution in `docs/third_party.md` during implementation.
 
 ## Moving toward or away from the camera
 
@@ -488,12 +488,12 @@ assumes one selected teacher; use a fixed `--teacher-roi` crop when necessary.
 
 ## Configure your classroom
 
-`classroom_config.example.json` contains the body, face, head, gaze, camera-motion
+`configs/classroom.example.json` contains the body, face, head, gaze, camera-motion
 and teaching-aid settings. Facing defaults are set for the back-of-classroom
 camera. Zones, groups and desks remain empty
 until annotated; those location-dependent labels stay unknown.
 
-Copy it to `classroom_config.json`. Coordinates are normalized to the **selected,
+Copy it to `configs/classroom.local.json`. Coordinates are normalized to the **selected,
 unmirrored teacher crop** (the full source image by default): x from left to right and y from top to bottom. Draw
 simple, non-self-intersecting polygons around floor areas, desk footprints, and
 group locations, not around the screen-space tops of desks. Keep zone interiors
@@ -529,10 +529,10 @@ association, so results can belong to different people in a multi-person frame.
 
 ```sh
 conda activate ureca
-python main.py  # Default: first 30 seconds of Calculus 1 Lecture 0.1
-python main.py --input "your_classroom.mp4" --config classroom_config.json --show-scene
+python -m classroom_behaviour  # Default: first 30 seconds of Calculus 1 Lecture 0.1
+python -m classroom_behaviour --input "your_classroom.mp4" --config configs/classroom.local.json --show-scene
 # Full silhouette on black, still with skeleton and behaviour panel:
-python main.py --input "your_classroom.mp4" --view mask --output-dir outputs/mask_run
+python -m classroom_behaviour --input "your_classroom.mp4" --view mask --output-dir outputs/runs/mask_run
 ```
 
 Default `--view overlay` retains the original frame and adds a blue person-mask
@@ -541,7 +541,7 @@ contours. `--view mask` fills the person silhouette on black; `--view skeleton`
 draws only landmarks on black. Labels are in the upper-right. On small frames,
 overflow labels remain in the CSV. Missing person masks are not carried forward.
 
-The output directory defaults to `outputs/behaviours` and contains:
+The output directory defaults to `outputs/runs/behaviours` and contains:
 
 - `*_behaviours.mp4`: silent, original frame rate and resolution.
 - `*_frames.csv`: raw/confirmed behaviour states, direction, zone, measurements,
@@ -596,7 +596,7 @@ Activity and counts are blank for wholly unobserved behaviour/windows, including
 disabled teaching-aid detection. Exported seconds use six decimal places. Labels
 can co-occur; their durations are not mutually exclusive categories.
 
-`window_summary.py --metadata PATH` can regenerate this CSV from existing frame
+`python -m classroom_behaviour.window_summary --metadata PATH` can regenerate this CSV from existing frame
 and event evidence without loading recognition models. It replaces only its
 window CSV, and rejects incomplete/nonconsecutive frames or invalid event times.
 

@@ -3,11 +3,11 @@
 The active video pipeline needs the MediaPipe **Pose** and **Hand** models below,
 the four OpenFace CE-CLM patch experts and bundled AU models, HMAD's model tables,
 and Grounding DINO Tiny. The MediaPipe Face model is optional for the retained
-standalone helper; it is not used for head/expression/gaze analysis in `main.py`.
+standalone helper; it is not used for head/expression/gaze analysis in `classroom_behaviour/cli.py`.
 
 Native/model setup is documented in [README.md](../README.md). On this macOS
-arm64 workspace, `python build_native.py` builds OpenFace and downloads its patch
-experts; `python setup_tracking.py --download-hmad --download-object-model`
+arm64 workspace, `python -m scripts.build_native` builds OpenFace and downloads its patch
+experts; `python -m scripts.setup_models --download-hmad --download-object-model`
 downloads the pinned HMAD checkout and the object checkpoint. Models stay out of
 Git. Grounding DINO's cache is `models/hf-cache/`; OpenFace/HMAD assets are under
 their `external/` checkouts. Runs record the model revisions and available hashes.

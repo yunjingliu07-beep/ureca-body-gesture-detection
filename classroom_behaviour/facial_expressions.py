@@ -14,7 +14,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from tracking_config import FaceRules, GazeRules, HeadRules, TrackingRules
+from .config import FaceRules, GazeRules, HeadRules, TrackingRules
 
 
 HEAD_LABELS = ("turning", "turning_left", "turning_right", "head_nodding", "head_shaking")

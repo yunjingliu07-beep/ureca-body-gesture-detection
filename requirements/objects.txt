@@ -1,5 +1,5 @@
 # Install in the ureca conda environment; native OpenFace and R are separate.
--r requirements.txt
+-r ../requirements.txt
 torch==2.15.0
 torchvision==0.29.2
 transformers==4.57.6

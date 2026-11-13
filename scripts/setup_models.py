@@ -12,10 +12,10 @@ import tarfile
 import tempfile
 import urllib.request
 
-from native_tracking import HMAD_REVISION, sha256
+from classroom_behaviour.native_tracking import HMAD_REVISION, sha256
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def download_openface_models(directory):
@@ -96,10 +96,10 @@ def main():
     if args.download_openface_models:
         download_openface_models(args.openface_dir)
     if args.download_object_model:
-        from teaching_aids import GroundingDinoDetector
+        from classroom_behaviour.teaching_aids import GroundingDinoDetector
         with GroundingDinoDetector(args.objects_model, args.objects_revision, cache_dir=str(ROOT / "models/hf-cache")) as detector:
             print(json.dumps(detector.metadata, indent=2))
-    from main import build_parser, dependency_report
+    from classroom_behaviour.cli import build_parser, dependency_report
     options = build_parser().parse_args([])
     options.hmad_dir = args.hmad_dir
     print(json.dumps(dependency_report(options), indent=2))
